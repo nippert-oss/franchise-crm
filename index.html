@@ -7,98 +7,290 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-gray-950 text-white min-h-screen flex items-center justify-center">
+<body class="bg-gray-950 text-white min-h-screen">
 
   <!-- 로그인 화면 -->
-  <div id="loginScreen" class="w-full max-w-sm px-6">
-    <div class="text-center mb-8">
-      <h1 class="text-2xl font-bold text-white">정총무 CRM</h1>
-      <p class="text-gray-400 text-sm mt-1">프랜차이즈 가맹영업 관리 플랫폼</p>
-    </div>
-
-    <div class="bg-gray-900 rounded-2xl p-6 space-y-4">
-      <div>
-        <label class="text-sm text-gray-400 mb-1 block">이메일</label>
-        <input
-          id="email"
-          type="email"
-          placeholder="이메일 입력"
-          class="w-full bg-gray-800 text-white rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-        />
+  <div id="loginScreen" class="min-h-screen flex items-center justify-center px-6">
+    <div class="w-full max-w-sm">
+      <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold">정총무 CRM</h1>
+        <p class="text-gray-400 text-sm mt-1">프랜차이즈 가맹영업 관리 플랫폼</p>
       </div>
-      <div>
-        <label class="text-sm text-gray-400 mb-1 block">비밀번호</label>
-        <input
-          id="password"
-          type="password"
-          placeholder="비밀번호 입력"
-          class="w-full bg-gray-800 text-white rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-        />
+      <div class="bg-gray-900 rounded-2xl p-6 space-y-4">
+        <div>
+          <label class="text-sm text-gray-400 mb-1 block">이메일</label>
+          <input id="email" type="email" placeholder="이메일 입력"
+            class="w-full bg-gray-800 text-white rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"/>
+        </div>
+        <div>
+          <label class="text-sm text-gray-400 mb-1 block">비밀번호</label>
+          <input id="password" type="password" placeholder="비밀번호 입력"
+            class="w-full bg-gray-800 text-white rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"/>
+        </div>
+        <button onclick="login()"
+          class="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl py-3 text-sm font-medium transition">
+          로그인
+        </button>
+        <p id="errorMsg" class="text-red-400 text-xs text-center hidden"></p>
       </div>
-      <button
-        onclick="login()"
-        class="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl py-3 text-sm font-medium transition"
-      >
-        로그인
-      </button>
-      <p id="errorMsg" class="text-red-400 text-xs text-center hidden"></p>
     </div>
   </div>
 
-  <!-- 로그인 후 대시보드 (임시) -->
-  <div id="dashboard" class="hidden w-full max-w-sm px-6">
-    <div class="text-center">
-      <h2 class="text-xl font-bold">👋 로그인 성공!</h2>
-      <p id="userEmail" class="text-gray-400 text-sm mt-2"></p>
-      <button
-        onclick="logout()"
-        class="mt-6 bg-gray-800 hover:bg-gray-700 text-white rounded-xl px-6 py-2 text-sm"
-      >
-        로그아웃
+  <!-- 메인 앱 -->
+  <div id="app" class="hidden flex flex-col min-h-screen pb-20">
+
+    <!-- 상단 헤더 -->
+    <div class="px-4 pt-6 pb-4 flex items-center justify-between">
+      <div>
+        <h1 class="text-lg font-bold">정총무 CRM</h1>
+        <p id="headerSub" class="text-gray-400 text-xs mt-0.5"></p>
+      </div>
+      <button onclick="logout()" class="text-xs text-gray-500 bg-gray-800 px-3 py-1.5 rounded-lg">로그아웃</button>
+    </div>
+
+    <!-- 화면들 -->
+    <div id="screenDashboard" class="px-4 space-y-4">
+
+      <!-- KPI 카드 -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-gray-900 rounded-2xl p-4">
+          <p class="text-gray-400 text-xs">이번달 신규 리드</p>
+          <p id="kpiNew" class="text-3xl font-bold mt-1">-</p>
+        </div>
+        <div class="bg-gray-900 rounded-2xl p-4">
+          <p class="text-gray-400 text-xs">전체 리드</p>
+          <p id="kpiTotal" class="text-3xl font-bold mt-1">-</p>
+        </div>
+        <div class="bg-gray-900 rounded-2xl p-4">
+          <p class="text-gray-400 text-xs">계약 완료</p>
+          <p id="kpiDone" class="text-3xl font-bold mt-1 text-green-400">-</p>
+        </div>
+        <div class="bg-gray-900 rounded-2xl p-4">
+          <p class="text-gray-400 text-xs">재접촉 대기</p>
+          <p id="kpiOverdue" class="text-3xl font-bold mt-1 text-red-400">-</p>
+        </div>
+      </div>
+
+      <!-- 단계별 현황 -->
+      <div class="bg-gray-900 rounded-2xl p-4">
+        <p class="text-sm font-medium mb-3">단계별 현황</p>
+        <div id="stageChart" class="space-y-2"></div>
+      </div>
+
+      <!-- 최근 리드 -->
+      <div class="bg-gray-900 rounded-2xl p-4">
+        <div class="flex items-center justify-between mb-3">
+          <p class="text-sm font-medium">최근 리드</p>
+          <button onclick="showScreen('leads')" class="text-xs text-blue-400">전체보기</button>
+        </div>
+        <div id="recentLeads" class="space-y-2"></div>
+      </div>
+
+    </div>
+
+    <!-- 리드 목록 화면 -->
+    <div id="screenLeads" class="hidden px-4 space-y-3">
+      <div class="flex gap-2 overflow-x-auto pb-1">
+        <button onclick="filterLeads('전체')" class="stage-btn active text-xs px-3 py-1.5 rounded-full border border-blue-500 text-blue-400 whitespace-nowrap">전체</button>
+        <button onclick="filterLeads('신규')" class="stage-btn text-xs px-3 py-1.5 rounded-full border border-gray-700 text-gray-400 whitespace-nowrap">신규</button>
+        <button onclick="filterLeads('상담중')" class="stage-btn text-xs px-3 py-1.5 rounded-full border border-gray-700 text-gray-400 whitespace-nowrap">상담중</button>
+        <button onclick="filterLeads('미팅준비')" class="stage-btn text-xs px-3 py-1.5 rounded-full border border-gray-700 text-gray-400 whitespace-nowrap">미팅준비</button>
+        <button onclick="filterLeads('계약검토')" class="stage-btn text-xs px-3 py-1.5 rounded-full border border-gray-700 text-gray-400 whitespace-nowrap">계약검토</button>
+        <button onclick="filterLeads('완료')" class="stage-btn text-xs px-3 py-1.5 rounded-full border border-gray-700 text-gray-400 whitespace-nowrap">완료</button>
+        <button onclick="filterLeads('보류')" class="stage-btn text-xs px-3 py-1.5 rounded-full border border-gray-700 text-gray-400 whitespace-nowrap">보류</button>
+      </div>
+      <div id="leadsList" class="space-y-2"></div>
+    </div>
+
+    <!-- 하단 탭바 -->
+    <div class="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 flex">
+      <button onclick="showScreen('dashboard')" id="tab-dashboard"
+        class="flex-1 py-3 flex flex-col items-center gap-1 text-blue-400">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        <span class="text-xs">홈</span>
+      </button>
+      <button onclick="showScreen('leads')" id="tab-leads"
+        class="flex-1 py-3 flex flex-col items-center gap-1 text-gray-500">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+        <span class="text-xs">리드</span>
+      </button>
+      <button onclick="showScreen('notify')" id="tab-notify"
+        class="flex-1 py-3 flex flex-col items-center gap-1 text-gray-500">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
+        </svg>
+        <span class="text-xs">알림</span>
+      </button>
+      <button onclick="showScreen('settings')" id="tab-settings"
+        class="flex-1 py-3 flex flex-col items-center gap-1 text-gray-500">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+        <span class="text-xs">설정</span>
       </button>
     </div>
+
   </div>
 
   <script>
     const SUPABASE_URL = 'https://yowpwrziyxuljhsewlrm.supabase.co'
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlvd3B3cnppeXh1bGpoc2V3bHJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNzU4MzYsImV4cCI6MjA5MDk1MTgzNn0.rpqjEV5ygfbcEq2JcyLvO7mwlycy2lLeNw-NkEsUhMA'
-
     const { createClient } = supabase
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+    let allLeads = []
+    const statusColors = {
+      '신규': 'bg-blue-900 text-blue-300',
+      '상담중': 'bg-yellow-900 text-yellow-300',
+      '미팅준비': 'bg-orange-900 text-orange-300',
+      '계약검토': 'bg-purple-900 text-purple-300',
+      '완료': 'bg-green-900 text-green-300',
+      '보류': 'bg-gray-700 text-gray-300'
+    }
 
     async function login() {
       const email = document.getElementById('email').value
       const password = document.getElementById('password').value
       const errMsg = document.getElementById('errorMsg')
-
       const { data, error } = await sb.auth.signInWithPassword({ email, password })
-
       if (error) {
         errMsg.textContent = '이메일 또는 비밀번호를 확인해주세요.'
         errMsg.classList.remove('hidden')
         return
       }
-
-      showDashboard(data.user.email)
+      initApp(data.user)
     }
 
     async function logout() {
       await sb.auth.signOut()
+      document.getElementById('app').classList.add('hidden')
       document.getElementById('loginScreen').classList.remove('hidden')
-      document.getElementById('dashboard').classList.add('hidden')
     }
 
-    function showDashboard(email) {
+    async function initApp(user) {
       document.getElementById('loginScreen').classList.add('hidden')
-      document.getElementById('dashboard').classList.remove('hidden')
-      document.getElementById('userEmail').textContent = email
+      document.getElementById('app').classList.remove('hidden')
+      document.getElementById('headerSub').textContent = user.email
+      await loadLeads()
+      showScreen('dashboard')
     }
 
-    // 이미 로그인된 경우 자동으로 대시보드
+    async function loadLeads() {
+      const { data, error } = await sb.from('leads').select('*').order('created_at', { ascending: false })
+      if (error) { console.error(error); return }
+      allLeads = data || []
+      renderDashboard()
+      renderLeads(allLeads)
+    }
+
+    function renderDashboard() {
+      const now = new Date()
+      const thisMonth = now.getMonth()
+      const thisYear = now.getFullYear()
+
+      const newThisMonth = allLeads.filter(l => {
+        const d = new Date(l.created_at)
+        return d.getMonth() === thisMonth && d.getFullYear() === thisYear
+      }).length
+
+      const done = allLeads.filter(l => l.status === '완료').length
+      const overdue = allLeads.filter(l =>
+        l.next_contact_at && new Date(l.next_contact_at) < now && l.status !== '완료'
+      ).length
+
+      document.getElementById('kpiNew').textContent = newThisMonth
+      document.getElementById('kpiTotal').textContent = allLeads.length
+      document.getElementById('kpiDone').textContent = done
+      document.getElementById('kpiOverdue').textContent = overdue
+
+      // 단계별 차트
+      const stages = ['신규', '상담중', '미팅준비', '계약검토', '완료', '보류']
+      const max = Math.max(...stages.map(s => allLeads.filter(l => l.status === s).length), 1)
+      document.getElementById('stageChart').innerHTML = stages.map(s => {
+        const cnt = allLeads.filter(l => l.status === s).length
+        const pct = Math.round((cnt / max) * 100)
+        return `
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-400 w-16">${s}</span>
+            <div class="flex-1 bg-gray-800 rounded-full h-2">
+              <div class="h-2 rounded-full bg-blue-500 transition-all" style="width:${pct}%"></div>
+            </div>
+            <span class="text-xs text-gray-400 w-4">${cnt}</span>
+          </div>`
+      }).join('')
+
+      // 최근 리드 3개
+      document.getElementById('recentLeads').innerHTML = allLeads.slice(0, 3).map(l => leadCard(l)).join('')
+    }
+
+    function renderLeads(leads) {
+      document.getElementById('leadsList').innerHTML = leads.length
+        ? leads.map(l => leadCard(l)).join('')
+        : '<p class="text-gray-500 text-sm text-center py-8">리드가 없습니다</p>'
+    }
+
+    function leadCard(l) {
+      const badge = statusColors[l.status] || 'bg-gray-700 text-gray-300'
+      return `
+        <div class="bg-gray-900 rounded-2xl p-4 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-medium">${l.name || '이름 없음'}</span>
+            <span class="text-xs px-2 py-1 rounded-full ${badge}">${l.status}</span>
+          </div>
+          <div class="text-xs text-gray-400 space-y-1">
+            ${l.region ? `<p>📍 ${l.region}</p>` : ''}
+            ${l.contact ? `<p>📞 ${l.contact}</p>` : ''}
+            ${l.source ? `<p>📢 ${l.source}</p>` : ''}
+            ${l.budget ? `<p>💰 ${l.budget.toLocaleString()}원</p>` : ''}
+          </div>
+          <div class="flex gap-2 pt-1">
+            ${['신규','상담중','미팅준비','계약검토','완료','보류'].map(s =>
+              s !== l.status ? `<button onclick="updateStatus('${l.id}','${s}')"
+                class="text-xs px-2 py-1 bg-gray-800 hover:bg-gray-700 rounded-lg text-gray-300">${s}</button>` : ''
+            ).join('')}
+          </div>
+        </div>`
+    }
+
+    async function updateStatus(id, status) {
+      await sb.from('leads').update({ status }).eq('id', id)
+      await loadLeads()
+    }
+
+    function filterLeads(status) {
+      document.querySelectorAll('.stage-btn').forEach(b => {
+        b.classList.remove('border-blue-500', 'text-blue-400')
+        b.classList.add('border-gray-700', 'text-gray-400')
+      })
+      event.target.classList.add('border-blue-500', 'text-blue-400')
+      event.target.classList.remove('border-gray-700', 'text-gray-400')
+      const filtered = status === '전체' ? allLeads : allLeads.filter(l => l.status === status)
+      renderLeads(filtered)
+    }
+
+    function showScreen(name) {
+      document.getElementById('screenDashboard').classList.add('hidden')
+      document.getElementById('screenLeads').classList.add('hidden')
+      if (document.getElementById('screenNotify')) document.getElementById('screenNotify').classList.add('hidden')
+
+      document.querySelectorAll('[id^="tab-"]').forEach(t => {
+        t.classList.remove('text-blue-400')
+        t.classList.add('text-gray-500')
+      })
+
+      document.getElementById('screen' + name.charAt(0).toUpperCase() + name.slice(1))?.classList.remove('hidden')
+      document.getElementById('tab-' + name)?.classList.add('text-blue-400')
+      document.getElementById('tab-' + name)?.classList.remove('text-gray-500')
+    }
+
     sb.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        showDashboard(data.session.user.email)
-      }
+      if (data.session) initApp(data.session.user)
     })
   </script>
 
