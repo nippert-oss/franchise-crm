@@ -6,293 +6,632 @@
   <title>정총무 CRM</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #0f0f0f; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    .sidebar-item { transition: all 0.15s; }
+    .sidebar-item:hover { background: #1a1a1a; }
+    .sidebar-item.active { background: #1e3a5f; border-left: 3px solid #3b82f6; }
+    .card { background: #111; border: 1px solid #1f1f1f; border-radius: 16px; }
+    .kpi-card { background: #0d0d0d; border: 1px solid #1f1f1f; border-radius: 12px; }
+    .lead-row:hover { background: #161616; cursor: pointer; }
+    .badge { border-radius: 6px; font-size: 11px; padding: 2px 8px; font-weight: 500; }
+    .btn-primary { background: #2563eb; color: white; border-radius: 8px; padding: 6px 14px; font-size: 13px; transition: all 0.15s; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .input-field { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; color: white; padding: 8px 12px; font-size: 13px; outline: none; width: 100%; }
+    .input-field:focus { border-color: #3b82f6; }
+    .log-item { border-left: 2px solid #1f1f1f; padding-left: 12px; }
+    @media (max-width: 768px) {
+      #sidebar { display: none; }
+      #mobileTab { display: flex; }
+      #mainContent { margin-left: 0 !important; }
+    }
+    @media (min-width: 769px) {
+      #mobileTab { display: none; }
+    }
+  </style>
 </head>
-<body class="bg-gray-950 text-white min-h-screen">
+<body class="bg-black text-white min-h-screen">
 
-  <!-- 로그인 화면 -->
-  <div id="loginScreen" class="min-h-screen flex items-center justify-center px-6">
-    <div class="w-full max-w-sm">
-      <div class="text-center mb-8">
-        <h1 class="text-2xl font-bold">정총무 CRM</h1>
-        <p class="text-gray-400 text-sm mt-1">프랜차이즈 가맹영업 관리 플랫폼</p>
+<!-- 로그인 화면 -->
+<div id="loginScreen" class="min-h-screen flex items-center justify-center px-6" style="background: radial-gradient(ellipse at center, #0f1a2e 0%, #000 70%);">
+  <div class="w-full max-w-sm">
+    <div class="text-center mb-10">
+      <div class="inline-flex items-center gap-2 mb-4">
+        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm font-bold">정</div>
+        <span class="text-xl font-bold tracking-tight">정총무 CRM</span>
       </div>
-      <div class="bg-gray-900 rounded-2xl p-6 space-y-4">
+      <p class="text-gray-500 text-sm">프랜차이즈 가맹영업 관리 플랫폼</p>
+    </div>
+    <div style="background:#0d0d0d; border:1px solid #1f1f1f; border-radius:20px; padding:28px;">
+      <div class="space-y-4">
         <div>
-          <label class="text-sm text-gray-400 mb-1 block">이메일</label>
-          <input id="email" type="email" placeholder="이메일 입력"
-            class="w-full bg-gray-800 text-white rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"/>
+          <label class="text-xs text-gray-500 mb-1.5 block uppercase tracking-wider">이메일</label>
+          <input id="email" type="email" placeholder="name@company.com" class="input-field" />
         </div>
         <div>
-          <label class="text-sm text-gray-400 mb-1 block">비밀번호</label>
-          <input id="password" type="password" placeholder="비밀번호 입력"
-            class="w-full bg-gray-800 text-white rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"/>
+          <label class="text-xs text-gray-500 mb-1.5 block uppercase tracking-wider">비밀번호</label>
+          <input id="password" type="password" placeholder="••••••••" class="input-field"
+            onkeydown="if(event.key==='Enter') login()" />
         </div>
-        <button onclick="login()"
-          class="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl py-3 text-sm font-medium transition">
+        <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl py-3 text-sm font-medium transition mt-2">
           로그인
         </button>
-        <p id="errorMsg" class="text-red-400 text-xs text-center hidden"></p>
+        <p id="errorMsg" class="text-red-400 text-xs text-center hidden">이메일 또는 비밀번호를 확인해주세요.</p>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- 메인 앱 -->
-  <div id="app" class="hidden flex flex-col min-h-screen pb-20">
+<!-- 메인 앱 -->
+<div id="app" class="hidden min-h-screen flex">
 
-    <!-- 상단 헤더 -->
-    <div class="px-4 pt-6 pb-4 flex items-center justify-between">
-      <div>
-        <h1 class="text-lg font-bold">정총무 CRM</h1>
-        <p id="headerSub" class="text-gray-400 text-xs mt-0.5"></p>
+  <!-- 사이드바 -->
+  <div id="sidebar" class="w-56 flex-shrink-0 flex flex-col" style="background:#080808; border-right:1px solid #1a1a1a; position:fixed; top:0; left:0; bottom:0; z-index:50;">
+    <div class="p-5 border-b" style="border-color:#1a1a1a;">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center text-xs font-bold">정</div>
+        <span class="font-bold text-sm">정총무 CRM</span>
       </div>
-      <button onclick="logout()" class="text-xs text-gray-500 bg-gray-800 px-3 py-1.5 rounded-lg">로그아웃</button>
+      <p id="sidebarEmail" class="text-xs text-gray-600 mt-2 truncate"></p>
+    </div>
+    <nav class="flex-1 p-3 space-y-1">
+      <div onclick="showScreen('dashboard')" id="nav-dashboard" class="sidebar-item active flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="text-blue-400"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span class="text-sm">대시보드</span>
+      </div>
+      <div onclick="showScreen('leads')" id="nav-leads" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-gray-400">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <span class="text-sm">리드 관리</span>
+      </div>
+      <div onclick="showScreen('brands')" id="nav-brands" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-gray-400">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        <span class="text-sm">고객사</span>
+      </div>
+      <div onclick="showScreen('pipeline')" id="nav-pipeline" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-gray-400">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        <span class="text-sm">파이프라인</span>
+      </div>
+    </nav>
+    <div class="p-3 border-t" style="border-color:#1a1a1a;">
+      <button onclick="logout()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-gray-900 transition text-sm">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        로그아웃
+      </button>
+    </div>
+  </div>
+
+  <!-- 메인 콘텐츠 -->
+  <div id="mainContent" class="flex-1 flex flex-col" style="margin-left:224px;">
+
+    <!-- 헤더 -->
+    <div class="px-8 py-5 flex items-center justify-between" style="border-bottom:1px solid #1a1a1a; background:#080808; position:sticky; top:0; z-index:40;">
+      <div class="flex items-center gap-3">
+        <button id="backBtn" onclick="goBack()" class="hidden text-gray-500 hover:text-white transition">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        </button>
+        <div>
+          <h2 id="pageTitle" class="text-lg font-bold">대시보드</h2>
+          <p id="pageSubtitle" class="text-xs text-gray-500 mt-0.5">전체 영업 현황</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="loadLeads()" class="text-xs text-gray-400 hover:text-white border border-gray-800 hover:border-gray-600 px-3 py-1.5 rounded-lg transition">새로고침</button>
+        <button onclick="showAddLead()" class="btn-primary flex items-center gap-1.5">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          리드 추가
+        </button>
+      </div>
     </div>
 
-    <!-- 화면들 -->
-    <div id="screenDashboard" class="px-4 space-y-4">
+    <div class="flex-1 overflow-auto p-8">
 
-      <!-- KPI 카드 -->
-      <div class="grid grid-cols-2 gap-3">
-        <div class="bg-gray-900 rounded-2xl p-4">
-          <p class="text-gray-400 text-xs">이번달 신규 리드</p>
-          <p id="kpiNew" class="text-3xl font-bold mt-1">-</p>
+      <!-- 대시보드 -->
+      <div id="screenDashboard">
+        <div class="grid grid-cols-4 gap-4 mb-6">
+          <div class="kpi-card p-5">
+            <p class="text-xs text-gray-500 mb-2">이번달 신규</p>
+            <p id="kpiNew" class="text-4xl font-bold">-</p>
+            <p class="text-xs text-green-500 mt-2">↑ 이번달</p>
+          </div>
+          <div class="kpi-card p-5">
+            <p class="text-xs text-gray-500 mb-2">전체 리드</p>
+            <p id="kpiTotal" class="text-4xl font-bold">-</p>
+            <p class="text-xs text-gray-600 mt-2">누적</p>
+          </div>
+          <div class="kpi-card p-5">
+            <p class="text-xs text-gray-500 mb-2">계약 완료</p>
+            <p id="kpiDone" class="text-4xl font-bold text-green-400">-</p>
+            <p class="text-xs text-green-600 mt-2">이번달</p>
+          </div>
+          <div class="kpi-card p-5">
+            <p class="text-xs text-gray-500 mb-2">재접촉 대기</p>
+            <p id="kpiOverdue" class="text-4xl font-bold text-red-400">-</p>
+            <p class="text-xs text-red-600 mt-2">즉시 연락 필요</p>
+          </div>
         </div>
-        <div class="bg-gray-900 rounded-2xl p-4">
-          <p class="text-gray-400 text-xs">전체 리드</p>
-          <p id="kpiTotal" class="text-3xl font-bold mt-1">-</p>
-        </div>
-        <div class="bg-gray-900 rounded-2xl p-4">
-          <p class="text-gray-400 text-xs">계약 완료</p>
-          <p id="kpiDone" class="text-3xl font-bold mt-1 text-green-400">-</p>
-        </div>
-        <div class="bg-gray-900 rounded-2xl p-4">
-          <p class="text-gray-400 text-xs">재접촉 대기</p>
-          <p id="kpiOverdue" class="text-3xl font-bold mt-1 text-red-400">-</p>
+        <div class="grid grid-cols-3 gap-4">
+          <div class="card p-6 col-span-1">
+            <p class="text-sm font-medium mb-4 text-gray-300">단계별 현황</p>
+            <div id="stageChart" class="space-y-3"></div>
+          </div>
+          <div class="card p-6 col-span-2">
+            <div class="flex items-center justify-between mb-4">
+              <p class="text-sm font-medium text-gray-300">최근 리드</p>
+              <button onclick="showScreen('leads')" class="text-xs text-blue-400 hover:text-blue-300">전체보기 →</button>
+            </div>
+            <div id="recentLeads" class="space-y-1"></div>
+          </div>
         </div>
       </div>
 
-      <!-- 단계별 현황 -->
-      <div class="bg-gray-900 rounded-2xl p-4">
-        <p class="text-sm font-medium mb-3">단계별 현황</p>
-        <div id="stageChart" class="space-y-2"></div>
+      <!-- 리드 목록 -->
+      <div id="screenLeads" class="hidden">
+        <div class="flex items-center gap-2 mb-5 flex-wrap">
+          <button onclick="filterLeads('전체')" class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-blue-600 text-blue-400">전체</button>
+          <button onclick="filterLeads('신규')" class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-gray-800 text-gray-400">신규</button>
+          <button onclick="filterLeads('상담중')" class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-gray-800 text-gray-400">상담중</button>
+          <button onclick="filterLeads('미팅준비')" class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-gray-800 text-gray-400">미팅준비</button>
+          <button onclick="filterLeads('계약검토')" class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-gray-800 text-gray-400">계약검토</button>
+          <button onclick="filterLeads('완료')" class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-gray-800 text-gray-400">완료</button>
+          <button onclick="filterLeads('보류')" class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-gray-800 text-gray-400">보류</button>
+        </div>
+        <div class="card overflow-hidden">
+          <table class="w-full text-sm">
+            <thead>
+              <tr style="border-bottom:1px solid #1f1f1f;">
+                <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">이름</th>
+                <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">연락처</th>
+                <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">지역</th>
+                <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">채널</th>
+                <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">예산</th>
+                <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">단계</th>
+                <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">액션</th>
+              </tr>
+            </thead>
+            <tbody id="leadsTable"></tbody>
+          </table>
+        </div>
       </div>
 
-      <!-- 최근 리드 -->
-      <div class="bg-gray-900 rounded-2xl p-4">
-        <div class="flex items-center justify-between mb-3">
-          <p class="text-sm font-medium">최근 리드</p>
-          <button onclick="showScreen('leads')" class="text-xs text-blue-400">전체보기</button>
+      <!-- 리드 상세 -->
+      <div id="screenDetail" class="hidden">
+        <div class="grid grid-cols-3 gap-4">
+
+          <!-- 왼쪽: 기본 정보 -->
+          <div class="col-span-1 space-y-4">
+            <div class="card p-5">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center text-blue-300 font-bold" id="detailAvatar"></div>
+                <div>
+                  <p id="detailName" class="font-bold"></p>
+                  <div id="detailBadge"></div>
+                </div>
+              </div>
+              <div class="space-y-3 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-gray-500">연락처</span>
+                  <span id="detailContact" class="text-gray-200"></span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-500">지역</span>
+                  <span id="detailRegion" class="text-gray-200"></span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-500">채널</span>
+                  <span id="detailSource" class="text-gray-200"></span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-500">예산</span>
+                  <span id="detailBudget" class="text-gray-200"></span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-500">유입일</span>
+                  <span id="detailCreated" class="text-gray-200"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 단계 변경 -->
+            <div class="card p-5">
+              <p class="text-xs text-gray-500 mb-3 uppercase tracking-wider">단계 변경</p>
+              <div class="space-y-2" id="stageButtons"></div>
+            </div>
+
+            <!-- 재접촉일 설정 -->
+            <div class="card p-5">
+              <p class="text-xs text-gray-500 mb-3 uppercase tracking-wider">재접촉 예정일</p>
+              <input type="date" id="nextContactDate" class="input-field mb-2" />
+              <button onclick="saveNextContact()" class="btn-primary w-full text-center py-2">저장</button>
+            </div>
+          </div>
+
+          <!-- 오른쪽: 활동 로그 -->
+          <div class="col-span-2 card p-5">
+            <p class="text-sm font-medium mb-4 text-gray-300">활동 로그</p>
+
+            <!-- 로그 입력 -->
+            <div class="mb-5 space-y-3" style="background:#0d0d0d; border:1px solid #1f1f1f; border-radius:12px; padding:16px;">
+              <div class="flex gap-2 flex-wrap">
+                <button onclick="setResult('연결됨')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:border-blue-500 hover:text-blue-400">📞 연결됨</button>
+                <button onclick="setResult('부재중')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:border-yellow-500 hover:text-yellow-400">📵 부재중</button>
+                <button onclick="setResult('거절')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:border-red-500 hover:text-red-400">❌ 거절</button>
+                <button onclick="setResult('긍정')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:border-green-500 hover:text-green-400">✅ 긍정</button>
+                <button onclick="setResult('보류')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-300">⏸ 보류</button>
+              </div>
+              <textarea id="logNote" class="input-field" rows="2" placeholder="메모 입력..."></textarea>
+              <button onclick="addLog()" class="btn-primary px-4 py-2 text-xs">기록 추가</button>
+            </div>
+
+            <!-- 로그 목록 -->
+            <div id="logList" class="space-y-3"></div>
+          </div>
         </div>
-        <div id="recentLeads" class="space-y-2"></div>
+      </div>
+
+      <!-- 고객사 -->
+      <div id="screenBrands" class="hidden">
+        <div class="card p-6">
+          <p class="text-sm text-gray-400">고객사 관리 — 다음 단계에서 추가</p>
+        </div>
+      </div>
+
+      <!-- 파이프라인 -->
+      <div id="screenPipeline" class="hidden">
+        <div class="card p-6">
+          <p class="text-sm text-gray-400">파이프라인 — 다음 단계에서 추가</p>
+        </div>
       </div>
 
     </div>
+  </div>
 
-    <!-- 리드 목록 화면 -->
-    <div id="screenLeads" class="hidden px-4 space-y-3">
-      <div class="flex gap-2 overflow-x-auto pb-1">
-        <button onclick="filterLeads('전체')" class="stage-btn active text-xs px-3 py-1.5 rounded-full border border-blue-500 text-blue-400 whitespace-nowrap">전체</button>
-        <button onclick="filterLeads('신규')" class="stage-btn text-xs px-3 py-1.5 rounded-full border border-gray-700 text-gray-400 whitespace-nowrap">신규</button>
-        <button onclick="filterLeads('상담중')" class="stage-btn text-xs px-3 py-1.5 rounded-full border border-gray-700 text-gray-400 whitespace-nowrap">상담중</button>
-        <button onclick="filterLeads('미팅준비')" class="stage-btn text-xs px-3 py-1.5 rounded-full border border-gray-700 text-gray-400 whitespace-nowrap">미팅준비</button>
-        <button onclick="filterLeads('계약검토')" class="stage-btn text-xs px-3 py-1.5 rounded-full border border-gray-700 text-gray-400 whitespace-nowrap">계약검토</button>
-        <button onclick="filterLeads('완료')" class="stage-btn text-xs px-3 py-1.5 rounded-full border border-gray-700 text-gray-400 whitespace-nowrap">완료</button>
-        <button onclick="filterLeads('보류')" class="stage-btn text-xs px-3 py-1.5 rounded-full border border-gray-700 text-gray-400 whitespace-nowrap">보류</button>
-      </div>
-      <div id="leadsList" class="space-y-2"></div>
-    </div>
-
-    <!-- 하단 탭바 -->
-    <div class="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 flex">
-      <button onclick="showScreen('dashboard')" id="tab-dashboard"
-        class="flex-1 py-3 flex flex-col items-center gap-1 text-blue-400">
-        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-        </svg>
+  <!-- 모바일 하단 탭 -->
+  <div id="mobileTab" class="fixed bottom-0 left-0 right-0 border-t z-50" style="background:#080808; border-color:#1a1a1a;">
+    <div class="flex">
+      <button onclick="showScreen('dashboard')" class="flex-1 py-3 flex flex-col items-center gap-1 text-blue-400">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         <span class="text-xs">홈</span>
       </button>
-      <button onclick="showScreen('leads')" id="tab-leads"
-        class="flex-1 py-3 flex flex-col items-center gap-1 text-gray-500">
-        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-        </svg>
+      <button onclick="showScreen('leads')" class="flex-1 py-3 flex flex-col items-center gap-1 text-gray-500">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
         <span class="text-xs">리드</span>
       </button>
-      <button onclick="showScreen('notify')" id="tab-notify"
-        class="flex-1 py-3 flex flex-col items-center gap-1 text-gray-500">
-        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
-        </svg>
-        <span class="text-xs">알림</span>
+      <button onclick="showScreen('brands')" class="flex-1 py-3 flex flex-col items-center gap-1 text-gray-500">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        <span class="text-xs">고객사</span>
       </button>
-      <button onclick="showScreen('settings')" id="tab-settings"
-        class="flex-1 py-3 flex flex-col items-center gap-1 text-gray-500">
-        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-        </svg>
-        <span class="text-xs">설정</span>
+      <button onclick="showScreen('pipeline')" class="flex-1 py-3 flex flex-col items-center gap-1 text-gray-500">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        <span class="text-xs">파이프라인</span>
       </button>
     </div>
-
   </div>
+</div>
 
-  <script>
-    const SUPABASE_URL = 'https://yowpwrziyxuljhsewlrm.supabase.co'
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlvd3B3cnppeXh1bGpoc2V3bHJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNzU4MzYsImV4cCI6MjA5MDk1MTgzNn0.rpqjEV5ygfbcEq2JcyLvO7mwlycy2lLeNw-NkEsUhMA'
-    const { createClient } = supabase
-    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+<!-- 리드 추가 모달 -->
+<div id="addLeadModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4" style="background:rgba(0,0,0,0.8);">
+  <div class="w-full max-w-md card p-6 space-y-4">
+    <div class="flex items-center justify-between">
+      <h3 class="font-medium">리드 추가</h3>
+      <button onclick="closeAddLead()" class="text-gray-500 hover:text-white">✕</button>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="text-xs text-gray-500 mb-1 block">이름 *</label>
+        <input id="addName" class="input-field" placeholder="홍길동" />
+      </div>
+      <div>
+        <label class="text-xs text-gray-500 mb-1 block">연락처</label>
+        <input id="addContact" class="input-field" placeholder="010-0000-0000" />
+      </div>
+      <div>
+        <label class="text-xs text-gray-500 mb-1 block">지역</label>
+        <input id="addRegion" class="input-field" placeholder="서울 강남" />
+      </div>
+      <div>
+        <label class="text-xs text-gray-500 mb-1 block">채널</label>
+        <select id="addSource" class="input-field">
+          <option value="">선택</option>
+          <option>네이버</option>
+          <option>인스타</option>
+          <option>직접문의</option>
+          <option>지인소개</option>
+          <option>기타</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs text-gray-500 mb-1 block">예산</label>
+        <input id="addBudget" type="number" class="input-field" placeholder="50000000" />
+      </div>
+      <div>
+        <label class="text-xs text-gray-500 mb-1 block">단계</label>
+        <select id="addStatus" class="input-field">
+          <option>신규</option>
+          <option>상담중</option>
+          <option>미팅준비</option>
+          <option>계약검토</option>
+          <option>완료</option>
+          <option>보류</option>
+        </select>
+      </div>
+    </div>
+    <button onclick="addLead()" class="btn-primary w-full py-2.5 text-center">추가하기</button>
+  </div>
+</div>
 
-    let allLeads = []
-    const statusColors = {
-      '신규': 'bg-blue-900 text-blue-300',
-      '상담중': 'bg-yellow-900 text-yellow-300',
-      '미팅준비': 'bg-orange-900 text-orange-300',
-      '계약검토': 'bg-purple-900 text-purple-300',
-      '완료': 'bg-green-900 text-green-300',
-      '보류': 'bg-gray-700 text-gray-300'
+<script>
+  const SUPABASE_URL = 'https://yowpwrziyxuljhsewlrm.supabase.co'
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlvd3B3cnppeXh1bGpoc2V3bHJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNzU4MzYsImV4cCI6MjA5MDk1MTgzNn0.rpqjEV5ygfbcEq2JcyLvO7mwlycy2lLeNw-NkEsUhMA'
+  const { createClient } = supabase
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+  let allLeads = []
+  let currentLead = null
+  let selectedResult = ''
+
+  const statusColors = {
+    '신규': '#1e3a5f|#3b82f6',
+    '상담중': '#3a2e1a|#f59e0b',
+    '미팅준비': '#3a1a1a|#f97316',
+    '계약검토': '#2a1a3a|#a855f7',
+    '완료': '#1a3a1a|#22c55e',
+    '보류': '#1f1f1f|#6b7280'
+  }
+
+  function getBadge(status) {
+    const [bg, color] = (statusColors[status] || '#1f1f1f|#6b7280').split('|')
+    return `<span class="badge" style="background:${bg};color:${color}">${status}</span>`
+  }
+
+  async function login() {
+    const email = document.getElementById('email').value
+    const password = document.getElementById('password').value
+    const { data, error } = await sb.auth.signInWithPassword({ email, password })
+    if (error) { document.getElementById('errorMsg').classList.remove('hidden'); return }
+    initApp(data.user)
+  }
+
+  async function logout() {
+    await sb.auth.signOut()
+    document.getElementById('app').classList.add('hidden')
+    document.getElementById('loginScreen').classList.remove('hidden')
+  }
+
+  async function initApp(user) {
+    document.getElementById('loginScreen').classList.add('hidden')
+    document.getElementById('app').classList.remove('hidden')
+    document.getElementById('sidebarEmail').textContent = user.email
+    await loadLeads()
+    showScreen('dashboard')
+  }
+
+  async function loadLeads() {
+    const { data } = await sb.from('leads').select('*').order('created_at', { ascending: false })
+    allLeads = data || []
+    renderDashboard()
+    renderLeadsTable(allLeads)
+  }
+
+  function renderDashboard() {
+    const now = new Date()
+    const newThisMonth = allLeads.filter(l => {
+      const d = new Date(l.created_at)
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+    }).length
+    const done = allLeads.filter(l => l.status === '완료').length
+    const overdue = allLeads.filter(l =>
+      l.next_contact_at && new Date(l.next_contact_at) < now && l.status !== '완료'
+    ).length
+
+    document.getElementById('kpiNew').textContent = newThisMonth
+    document.getElementById('kpiTotal').textContent = allLeads.length
+    document.getElementById('kpiDone').textContent = done
+    document.getElementById('kpiOverdue').textContent = overdue
+
+    const stages = ['신규','상담중','미팅준비','계약검토','완료','보류']
+    const max = Math.max(...stages.map(s => allLeads.filter(l => l.status === s).length), 1)
+    document.getElementById('stageChart').innerHTML = stages.map(s => {
+      const cnt = allLeads.filter(l => l.status === s).length
+      const pct = Math.round((cnt / max) * 100)
+      const [, color] = (statusColors[s] || '#1f1f1f|#6b7280').split('|')
+      return `<div>
+        <div class="flex justify-between text-xs mb-1">
+          <span class="text-gray-400">${s}</span>
+          <span class="text-gray-500">${cnt}</span>
+        </div>
+        <div class="h-1.5 rounded-full" style="background:#1a1a1a">
+          <div class="h-1.5 rounded-full" style="width:${pct}%;background:${color}"></div>
+        </div>
+      </div>`
+    }).join('')
+
+    document.getElementById('recentLeads').innerHTML = allLeads.slice(0, 5).map(l => `
+      <div class="lead-row flex items-center gap-4 px-3 py-2.5 rounded-lg" onclick="openDetail('${l.id}')" style="border-bottom:1px solid #111">
+        <span class="font-medium text-sm w-24 truncate">${l.name || '-'}</span>
+        <span class="text-xs text-gray-500 w-28 truncate">${l.contact || '-'}</span>
+        <span class="text-xs text-gray-500 w-20 truncate">${l.region || '-'}</span>
+        <span class="text-xs text-gray-500 flex-1">${l.source || '-'}</span>
+        ${getBadge(l.status)}
+      </div>`).join('') || '<p class="text-xs text-gray-600 py-4 text-center">리드가 없습니다</p>'
+  }
+
+  function renderLeadsTable(leads) {
+    document.getElementById('leadsTable').innerHTML = leads.length
+      ? leads.map(l => `
+        <tr class="lead-row" onclick="openDetail('${l.id}')" style="border-bottom:1px solid #111">
+          <td class="px-5 py-3 text-sm font-medium">${l.name || '-'}</td>
+          <td class="px-5 py-3 text-xs text-gray-400">${l.contact || '-'}</td>
+          <td class="px-5 py-3 text-xs text-gray-400">${l.region || '-'}</td>
+          <td class="px-5 py-3 text-xs text-gray-400">${l.source || '-'}</td>
+          <td class="px-5 py-3 text-xs text-gray-400">${l.budget ? Number(l.budget).toLocaleString()+'원' : '-'}</td>
+          <td class="px-5 py-3">${getBadge(l.status)}</td>
+          <td class="px-5 py-3" onclick="event.stopPropagation()">
+            <select onchange="updateStatus('${l.id}', this.value)"
+              class="text-xs bg-transparent border border-gray-800 rounded px-2 py-1 text-gray-400">
+              ${['신규','상담중','미팅준비','계약검토','완료','보류'].map(s =>
+                `<option value="${s}" ${s===l.status?'selected':''}>${s}</option>`
+              ).join('')}
+            </select>
+          </td>
+        </tr>`).join('')
+      : `<tr><td colspan="7" class="px-5 py-10 text-center text-xs text-gray-600">리드가 없습니다</td></tr>`
+  }
+
+  async function openDetail(id) {
+    currentLead = allLeads.find(l => l.id === id)
+    if (!currentLead) return
+
+    document.getElementById('detailAvatar').textContent = (currentLead.name || '?')[0]
+    document.getElementById('detailName').textContent = currentLead.name || '-'
+    document.getElementById('detailBadge').innerHTML = getBadge(currentLead.status)
+    document.getElementById('detailContact').textContent = currentLead.contact || '-'
+    document.getElementById('detailRegion').textContent = currentLead.region || '-'
+    document.getElementById('detailSource').textContent = currentLead.source || '-'
+    document.getElementById('detailBudget').textContent = currentLead.budget ? Number(currentLead.budget).toLocaleString()+'원' : '-'
+    document.getElementById('detailCreated').textContent = new Date(currentLead.created_at).toLocaleDateString('ko-KR')
+    if (currentLead.next_contact_at)
+      document.getElementById('nextContactDate').value = currentLead.next_contact_at.split('T')[0]
+
+    document.getElementById('stageButtons').innerHTML = ['신규','상담중','미팅준비','계약검토','완료','보류'].map(s => {
+      const [bg, color] = (statusColors[s] || '#1f1f1f|#6b7280').split('|')
+      const isActive = s === currentLead.status
+      return `<button onclick="updateStatusDetail('${s}')"
+        class="w-full text-left text-xs px-3 py-2 rounded-lg transition"
+        style="background:${isActive ? bg : '#1a1a1a'};color:${isActive ? color : '#6b7280'};border:1px solid ${isActive ? color : '#2a2a2a'}">
+        ${isActive ? '✓ ' : ''}${s}
+      </button>`
+    }).join('')
+
+    await loadLogs()
+    showScreen('detail')
+    document.getElementById('backBtn').classList.remove('hidden')
+  }
+
+  async function loadLogs() {
+    const { data } = await sb.from('lead_logs')
+      .select('*')
+      .eq('lead_id', currentLead.id)
+      .order('created_at', { ascending: false })
+
+    const logs = data || []
+    const resultColors = {
+      '연결됨': '#3b82f6', '부재중': '#f59e0b',
+      '거절': '#ef4444', '긍정': '#22c55e', '보류': '#6b7280'
     }
-
-    async function login() {
-      const email = document.getElementById('email').value
-      const password = document.getElementById('password').value
-      const errMsg = document.getElementById('errorMsg')
-      const { data, error } = await sb.auth.signInWithPassword({ email, password })
-      if (error) {
-        errMsg.textContent = '이메일 또는 비밀번호를 확인해주세요.'
-        errMsg.classList.remove('hidden')
-        return
-      }
-      initApp(data.user)
-    }
-
-    async function logout() {
-      await sb.auth.signOut()
-      document.getElementById('app').classList.add('hidden')
-      document.getElementById('loginScreen').classList.remove('hidden')
-    }
-
-    async function initApp(user) {
-      document.getElementById('loginScreen').classList.add('hidden')
-      document.getElementById('app').classList.remove('hidden')
-      document.getElementById('headerSub').textContent = user.email
-      await loadLeads()
-      showScreen('dashboard')
-    }
-
-    async function loadLeads() {
-      const { data, error } = await sb.from('leads').select('*').order('created_at', { ascending: false })
-      if (error) { console.error(error); return }
-      allLeads = data || []
-      renderDashboard()
-      renderLeads(allLeads)
-    }
-
-    function renderDashboard() {
-      const now = new Date()
-      const thisMonth = now.getMonth()
-      const thisYear = now.getFullYear()
-
-      const newThisMonth = allLeads.filter(l => {
-        const d = new Date(l.created_at)
-        return d.getMonth() === thisMonth && d.getFullYear() === thisYear
-      }).length
-
-      const done = allLeads.filter(l => l.status === '완료').length
-      const overdue = allLeads.filter(l =>
-        l.next_contact_at && new Date(l.next_contact_at) < now && l.status !== '완료'
-      ).length
-
-      document.getElementById('kpiNew').textContent = newThisMonth
-      document.getElementById('kpiTotal').textContent = allLeads.length
-      document.getElementById('kpiDone').textContent = done
-      document.getElementById('kpiOverdue').textContent = overdue
-
-      // 단계별 차트
-      const stages = ['신규', '상담중', '미팅준비', '계약검토', '완료', '보류']
-      const max = Math.max(...stages.map(s => allLeads.filter(l => l.status === s).length), 1)
-      document.getElementById('stageChart').innerHTML = stages.map(s => {
-        const cnt = allLeads.filter(l => l.status === s).length
-        const pct = Math.round((cnt / max) * 100)
-        return `
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-gray-400 w-16">${s}</span>
-            <div class="flex-1 bg-gray-800 rounded-full h-2">
-              <div class="h-2 rounded-full bg-blue-500 transition-all" style="width:${pct}%"></div>
-            </div>
-            <span class="text-xs text-gray-400 w-4">${cnt}</span>
-          </div>`
-      }).join('')
-
-      // 최근 리드 3개
-      document.getElementById('recentLeads').innerHTML = allLeads.slice(0, 3).map(l => leadCard(l)).join('')
-    }
-
-    function renderLeads(leads) {
-      document.getElementById('leadsList').innerHTML = leads.length
-        ? leads.map(l => leadCard(l)).join('')
-        : '<p class="text-gray-500 text-sm text-center py-8">리드가 없습니다</p>'
-    }
-
-    function leadCard(l) {
-      const badge = statusColors[l.status] || 'bg-gray-700 text-gray-300'
-      return `
-        <div class="bg-gray-900 rounded-2xl p-4 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="font-medium">${l.name || '이름 없음'}</span>
-            <span class="text-xs px-2 py-1 rounded-full ${badge}">${l.status}</span>
+    document.getElementById('logList').innerHTML = logs.length
+      ? logs.map(log => `
+        <div class="log-item mb-3" style="border-color:${resultColors[log.contact_result] || '#1f1f1f'}">
+          <div class="flex items-center gap-2 mb-1">
+            ${log.contact_result ? `<span class="text-xs font-medium" style="color:${resultColors[log.contact_result]}">${log.contact_result}</span>` : ''}
+            ${log.status_changed_to ? `<span class="text-xs text-gray-600">→ ${log.status_changed_to}</span>` : ''}
+            <span class="text-xs text-gray-600 ml-auto">${new Date(log.created_at).toLocaleDateString('ko-KR')}</span>
           </div>
-          <div class="text-xs text-gray-400 space-y-1">
-            ${l.region ? `<p>📍 ${l.region}</p>` : ''}
-            ${l.contact ? `<p>📞 ${l.contact}</p>` : ''}
-            ${l.source ? `<p>📢 ${l.source}</p>` : ''}
-            ${l.budget ? `<p>💰 ${l.budget.toLocaleString()}원</p>` : ''}
-          </div>
-          <div class="flex gap-2 pt-1">
-            ${['신규','상담중','미팅준비','계약검토','완료','보류'].map(s =>
-              s !== l.status ? `<button onclick="updateStatus('${l.id}','${s}')"
-                class="text-xs px-2 py-1 bg-gray-800 hover:bg-gray-700 rounded-lg text-gray-300">${s}</button>` : ''
-            ).join('')}
-          </div>
-        </div>`
-    }
+          ${log.note ? `<p class="text-xs text-gray-400">${log.note}</p>` : ''}
+        </div>`).join('')
+      : '<p class="text-xs text-gray-600">아직 활동 기록이 없습니다</p>'
+  }
 
-    async function updateStatus(id, status) {
-      await sb.from('leads').update({ status }).eq('id', id)
-      await loadLeads()
-    }
-
-    function filterLeads(status) {
-      document.querySelectorAll('.stage-btn').forEach(b => {
-        b.classList.remove('border-blue-500', 'text-blue-400')
-        b.classList.add('border-gray-700', 'text-gray-400')
-      })
-      event.target.classList.add('border-blue-500', 'text-blue-400')
-      event.target.classList.remove('border-gray-700', 'text-gray-400')
-      const filtered = status === '전체' ? allLeads : allLeads.filter(l => l.status === status)
-      renderLeads(filtered)
-    }
-
-    function showScreen(name) {
-      document.getElementById('screenDashboard').classList.add('hidden')
-      document.getElementById('screenLeads').classList.add('hidden')
-      if (document.getElementById('screenNotify')) document.getElementById('screenNotify').classList.add('hidden')
-
-      document.querySelectorAll('[id^="tab-"]').forEach(t => {
-        t.classList.remove('text-blue-400')
-        t.classList.add('text-gray-500')
-      })
-
-      document.getElementById('screen' + name.charAt(0).toUpperCase() + name.slice(1))?.classList.remove('hidden')
-      document.getElementById('tab-' + name)?.classList.add('text-blue-400')
-      document.getElementById('tab-' + name)?.classList.remove('text-gray-500')
-    }
-
-    sb.auth.getSession().then(({ data }) => {
-      if (data.session) initApp(data.session.user)
+  function setResult(result) {
+    selectedResult = result
+    document.querySelectorAll('.result-btn').forEach(b => {
+      b.classList.remove('border-blue-500','text-blue-400','border-green-500','text-green-400','border-red-500','text-red-400','border-yellow-500','text-yellow-400')
     })
-  </script>
+    event.target.classList.add('border-blue-500','text-blue-400')
+  }
+
+  async function addLog() {
+    if (!currentLead) return
+    const note = document.getElementById('logNote').value
+    if (!note && !selectedResult) return alert('결과 또는 메모를 입력해주세요')
+    await sb.from('lead_logs').insert({
+      lead_id: currentLead.id,
+      contact_result: selectedResult || null,
+      note: note || null,
+    })
+    document.getElementById('logNote').value = ''
+    selectedResult = ''
+    await loadLogs()
+  }
+
+  async function updateStatus(id, status) {
+    await sb.from('leads').update({ status }).eq('id', id)
+    await loadLeads()
+  }
+
+  async function updateStatusDetail(status) {
+    await sb.from('leads').update({ status }).eq('id', currentLead.id)
+    await sb.from('lead_logs').insert({
+      lead_id: currentLead.id,
+      status_changed_to: status,
+      note: `단계 변경: ${currentLead.status} → ${status}`
+    })
+    currentLead.status = status
+    await loadLeads()
+    openDetail(currentLead.id)
+  }
+
+  async function saveNextContact() {
+    const date = document.getElementById('nextContactDate').value
+    if (!date) return
+    await sb.from('leads').update({ next_contact_at: date }).eq('id', currentLead.id)
+    alert('재접촉일이 저장됐어요!')
+    await loadLeads()
+  }
+
+  function filterLeads(status) {
+    document.querySelectorAll('.stage-btn').forEach(b => {
+      b.classList.remove('border-blue-600','text-blue-400')
+      b.classList.add('border-gray-800','text-gray-400')
+    })
+    event.target.classList.add('border-blue-600','text-blue-400')
+    event.target.classList.remove('border-gray-800','text-gray-400')
+    renderLeadsTable(status === '전체' ? allLeads : allLeads.filter(l => l.status === status))
+  }
+
+  function goBack() {
+    showScreen('leads')
+    document.getElementById('backBtn').classList.add('hidden')
+  }
+
+  function showScreen(name) {
+    ['dashboard','leads','detail','brands','pipeline'].forEach(s => {
+      document.getElementById('screen' + s.charAt(0).toUpperCase() + s.slice(1))?.classList.add('hidden')
+      document.getElementById('nav-' + s)?.classList.remove('active')
+      document.getElementById('nav-' + s)?.classList.add('text-gray-400')
+    })
+    document.getElementById('screen' + name.charAt(0).toUpperCase() + name.slice(1))?.classList.remove('hidden')
+    document.getElementById('nav-' + name)?.classList.add('active')
+    document.getElementById('nav-' + name)?.classList.remove('text-gray-400')
+    const titles = { dashboard:'대시보드', leads:'리드 관리', detail:'리드 상세', brands:'고객사', pipeline:'파이프라인' }
+    document.getElementById('pageTitle').textContent = titles[name] || ''
+    if (name !== 'detail') document.getElementById('backBtn').classList.add('hidden')
+  }
+
+  function showAddLead() { document.getElementById('addLeadModal').classList.remove('hidden') }
+  function closeAddLead() { document.getElementById('addLeadModal').classList.add('hidden') }
+
+  async function addLead() {
+    const name = document.getElementById('addName').value
+    if (!name) return alert('이름을 입력해주세요')
+    await sb.from('leads').insert({
+      name,
+      contact: document.getElementById('addContact').value,
+      region: document.getElementById('addRegion').value,
+      source: document.getElementById('addSource').value,
+      budget: document.getElementById('addBudget').value || null,
+      status: document.getElementById('addStatus').value,
+    })
+    closeAddLead()
+    await loadLeads()
+  }
+
+  sb.auth.getSession().then(({ data }) => {
+    if (data.session) initApp(data.session.user)
+  })
+</script>
 
 </body>
 </html>
