@@ -6,6 +6,7 @@
   <title>정총무 CRM</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     * { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
     ::-webkit-scrollbar { width: 4px; }
@@ -271,22 +272,139 @@
         </div>
       </div>
 
-      <!-- 고객사 -->
+  <!-- 고객사 -->
       <div id="screenBrands" class="hidden">
-        <div class="card p-6">
-          <p class="text-sm text-gray-400">고객사 관리 — 다음 단계에서 추가</p>
+        <div class="space-y-4">
+
+          <!-- CSV/엑셀 업로드 -->
+          <div class="card p-6">
+            <p class="text-sm font-medium mb-1 text-gray-300">엑셀 / CSV 업로드</p>
+            <p class="text-xs text-gray-500 mb-4">광고대행사에서 받은 DB를 업로드하면 자동으로 리드로 변환돼요</p>
+
+            <!-- 컬럼 매핑 안내 -->
+            <div class="mb-4 p-3 rounded-lg text-xs text-gray-400" style="background:#0d0d0d; border:1px solid #1f1f1f;">
+              <p class="font-medium text-gray-300 mb-2">📋 지원 컬럼명 (자동 인식)</p>
+              <div class="grid grid-cols-2 gap-1">
+                <p>이름, 성함, Name → <span class="text-blue-400">이름</span></p>
+                <p>연락처, 전화, 핸드폰, Phone → <span class="text-blue-400">연락처</span></p>
+                <p>지역, 희망지역, 지점 → <span class="text-blue-400">지역</span></p>
+                <p>예산, 투자금 → <span class="text-blue-400">예산</span></p>
+                <p>유입경로, 채널, 매체 → <span class="text-blue-400">채널</span></p>
+              </div>
+            </div>
+
+            <!-- 고객사 선택 -->
+            <div class="mb-3">
+              <label class="text-xs text-gray-500 mb-1 block">고객사 (브랜드)</label>
+              <select id="uploadBrand" class="input-field" style="max-width:300px;">
+                <option value="">선택 안함</option>
+                <option>와요커피</option>
+                <option>정총무 내부</option>
+              </select>
+            </div>
+
+            <!-- 파일 업로드 -->
+            <div id="dropZone"
+              class="border-2 border-dashed border-gray-700 rounded-xl p-8 text-center cursor-pointer hover:border-blue-600 transition mb-4"
+              onclick="document.getElementById('fileInput').click()"
+              ondragover="event.preventDefault(); this.style.borderColor='#3b82f6'"
+              ondragleave="this.style.borderColor='#374151'"
+              ondrop="handleDrop(event)">
+              <p class="text-gray-400 text-sm mb-1">📂 클릭하거나 파일을 드래그하세요</p>
+              <p class="text-gray-600 text-xs">.csv, .xlsx 파일 지원</p>
+              <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" class="hidden" onchange="handleFile(event)" />
+            </div>
+
+            <!-- 미리보기 -->
+            <div id="previewSection" class="hidden">
+              <div class="flex items-center justify-between mb-3">
+                <p class="text-sm font-medium text-gray-300">미리보기 <span id="previewCount" class="text-gray-500 text-xs"></span></p>
+                <div class="flex gap-2">
+                  <button onclick="clearUpload()" class="text-xs text-gray-500 border border-gray-700 px-3 py-1.5 rounded-lg hover:border-gray-500">취소</button>
+                  <button onclick="uploadLeads()" class="btn-primary text-xs px-4 py-1.5">리드로 가져오기</button>
+                </div>
+              </div>
+              <div class="card overflow-hidden">
+                <table class="w-full text-xs">
+                  <thead id="previewHead"></thead>
+                  <tbody id="previewBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 결과 -->
+            <div id="uploadResult" class="hidden p-3 rounded-lg text-sm" style="background:#1a3a1a; border:1px solid #22c55e; color:#22c55e;"></div>
+          </div>
+
         </div>
       </div>
 
       <!-- 파이프라인 -->
       <div id="screenPipeline" class="hidden">
-        <div class="card p-6">
-          <p class="text-sm text-gray-400">파이프라인 — 다음 단계에서 추가</p>
+        <div class="flex gap-3 overflow-x-auto pb-4" style="min-height: 600px;">
+
+          <!-- 신규 -->
+          <div class="flex-shrink-0 w-64">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-medium text-blue-400">신규</span>
+              <span id="pipe-count-신규" class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span>
+            </div>
+            <div id="pipe-신규" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d; border:1px dashed #1f1f1f;"
+              ondragover="event.preventDefault()" ondrop="dropLead(event, '신규')"></div>
+          </div>
+
+          <!-- 상담중 -->
+          <div class="flex-shrink-0 w-64">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-medium text-yellow-400">상담중</span>
+              <span id="pipe-count-상담중" class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span>
+            </div>
+            <div id="pipe-상담중" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d; border:1px dashed #1f1f1f;"
+              ondragover="event.preventDefault()" ondrop="dropLead(event, '상담중')"></div>
+          </div>
+
+          <!-- 미팅준비 -->
+          <div class="flex-shrink-0 w-64">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-medium text-orange-400">미팅준비</span>
+              <span id="pipe-count-미팅준비" class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span>
+            </div>
+            <div id="pipe-미팅준비" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d; border:1px dashed #1f1f1f;"
+              ondragover="event.preventDefault()" ondrop="dropLead(event, '미팅준비')"></div>
+          </div>
+
+          <!-- 계약검토 -->
+          <div class="flex-shrink-0 w-64">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-medium text-purple-400">계약검토</span>
+              <span id="pipe-count-계약검토" class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span>
+            </div>
+            <div id="pipe-계약검토" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d; border:1px dashed #1f1f1f;"
+              ondragover="event.preventDefault()" ondrop="dropLead(event, '계약검토')"></div>
+          </div>
+
+          <!-- 완료 -->
+          <div class="flex-shrink-0 w-64">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-medium text-green-400">완료</span>
+              <span id="pipe-count-완료" class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span>
+            </div>
+            <div id="pipe-완료" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d; border:1px dashed #1f1f1f;"
+              ondragover="event.preventDefault()" ondrop="dropLead(event, '완료')"></div>
+          </div>
+
+          <!-- 보류 -->
+          <div class="flex-shrink-0 w-64">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-medium text-gray-400">보류</span>
+              <span id="pipe-count-보류" class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span>
+            </div>
+            <div id="pipe-보류" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d; border:1px dashed #1f1f1f;"
+              ondragover="event.preventDefault()" ondrop="dropLead(event, '보류')"></div>
+          </div>
+
         </div>
       </div>
-
-    </div>
-  </div>
 
   <!-- 모바일 하단 탭 -->
   <div id="mobileTab" class="fixed bottom-0 left-0 right-0 border-t z-50" style="background:#080808; border-color:#1a1a1a;">
@@ -414,7 +532,13 @@
     renderDashboard()
     renderLeadsTable(allLeads)
   }
-
+async function loadLeads() {
+    const { data } = await sb.from('leads').select('*').order('created_at', { ascending: false })
+    allLeads = data || []
+    renderDashboard()
+    renderLeadsTable(allLeads)
+    renderPipeline()  // ← 이거 추가
+  }
   function renderDashboard() {
     const now = new Date()
     const newThisMonth = allLeads.filter(l => {
@@ -631,6 +755,154 @@
   sb.auth.getSession().then(({ data }) => {
     if (data.session) initApp(data.session.user)
   })
+// ===== 엑셀/CSV 업로드 =====
+  const colMap = {
+    name: ['이름','성함','name','성명','고객명'],
+    contact: ['연락처','전화','핸드폰','휴대폰','phone','tel','전화번호'],
+    region: ['지역','희망지역','지점','희망상권','지역명'],
+    budget: ['예산','투자금','투자예산','자본금'],
+    source: ['유입경로','채널','매체','출처','광고채널']
+  }
+
+  let parsedLeads = []
+
+  function handleDrop(e) {
+    e.preventDefault()
+    document.getElementById('dropZone').style.borderColor = '#374151'
+    const file = e.dataTransfer.files[0]
+    if (file) processFile(file)
+  }
+
+  function handleFile(e) {
+    const file = e.target.files[0]
+    if (file) processFile(file)
+  }
+
+  function processFile(file) {
+    const ext = file.name.split('.').pop().toLowerCase()
+    const reader = new FileReader()
+    if (ext === 'csv') {
+      reader.onload = (e) => parseCSV(e.target.result)
+      reader.readAsText(file, 'UTF-8')
+    } else if (ext === 'xlsx' || ext === 'xls') {
+      reader.onload = (e) => {
+        const data = new Uint8Array(e.target.result)
+        const workbook = XLSX.read(data, { type: 'array' })
+        const sheet = workbook.Sheets[workbook.SheetNames[0]]
+        const csv = XLSX.utils.sheet_to_csv(sheet)
+        parseCSV(csv)
+      }
+      reader.readAsArrayBuffer(file)
+    } else {
+      alert('CSV 또는 엑셀 파일만 업로드 가능합니다')
+    }
+  }
+
+  function parseCSV(text) {
+    const lines = text.trim().split('\n')
+    if (lines.length < 2) return alert('데이터가 없습니다')
+    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''))
+    const mapping = {}
+    headers.forEach((h, i) => {
+      for (const [field, aliases] of Object.entries(colMap)) {
+        if (aliases.some(a => h.includes(a))) mapping[field] = i
+      }
+    })
+    parsedLeads = lines.slice(1).filter(l => l.trim()).map(line => {
+      const cols = line.split(',').map(c => c.trim().replace(/"/g, ''))
+      return {
+        name: mapping.name !== undefined ? cols[mapping.name] : null,
+        contact: mapping.contact !== undefined ? cols[mapping.contact] : null,
+        region: mapping.region !== undefined ? cols[mapping.region] : null,
+        budget: mapping.budget !== undefined ? (parseInt(cols[mapping.budget].replace(/[^0-9]/g, '')) || null) : null,
+        source: mapping.source !== undefined ? cols[mapping.source] : null,
+        status: '신규'
+      }
+    }).filter(l => l.name)
+
+    if (parsedLeads.length === 0) return alert('이름 컬럼을 찾을 수 없습니다.\n컬럼명을 확인해주세요.')
+
+    document.getElementById('previewCount').textContent = `${parsedLeads.length}건`
+    document.getElementById('previewHead').innerHTML = `
+      <tr style="border-bottom:1px solid #1f1f1f;">
+        <th class="text-left px-4 py-2 text-gray-500">이름</th>
+        <th class="text-left px-4 py-2 text-gray-500">연락처</th>
+        <th class="text-left px-4 py-2 text-gray-500">지역</th>
+        <th class="text-left px-4 py-2 text-gray-500">채널</th>
+        <th class="text-left px-4 py-2 text-gray-500">예산</th>
+      </tr>`
+    document.getElementById('previewBody').innerHTML = parsedLeads.slice(0, 10).map(l => `
+      <tr style="border-bottom:1px solid #111;">
+        <td class="px-4 py-2 text-gray-300">${l.name || '-'}</td>
+        <td class="px-4 py-2 text-gray-400">${l.contact || '-'}</td>
+        <td class="px-4 py-2 text-gray-400">${l.region || '-'}</td>
+        <td class="px-4 py-2 text-gray-400">${l.source || '-'}</td>
+        <td class="px-4 py-2 text-gray-400">${l.budget ? l.budget.toLocaleString()+'원' : '-'}</td>
+      </tr>`).join('')
+
+    document.getElementById('previewSection').classList.remove('hidden')
+    document.getElementById('uploadResult').classList.add('hidden')
+  }
+
+  async function uploadLeads() {
+    if (!parsedLeads.length) return
+    const { error } = await sb.from('leads').insert(parsedLeads)
+    if (error) { alert('오류: ' + error.message); return }
+    document.getElementById('uploadResult').textContent = `✅ ${parsedLeads.length}건 리드 등록 완료!`
+    document.getElementById('uploadResult').classList.remove('hidden')
+    document.getElementById('previewSection').classList.add('hidden')
+    parsedLeads = []
+    await loadLeads()
+  }
+
+  function clearUpload() {
+    parsedLeads = []
+    document.getElementById('previewSection').classList.add('hidden')
+    document.getElementById('fileInput').value = ''
+  }
+  // ===== 파이프라인 =====
+  let dragLeadId = null
+
+  function renderPipeline() {
+    const stages = ['신규','상담중','미팅준비','계약검토','완료','보류']
+    stages.forEach(s => {
+      const leads = allLeads.filter(l => l.status === s)
+      document.getElementById('pipe-count-' + s).textContent = leads.length
+      document.getElementById('pipe-' + s).innerHTML = leads.map(l => `
+        <div draggable="true"
+          ondragstart="dragLeadId='${l.id}'"
+          onclick="openDetail('${l.id}')"
+          class="card p-3 cursor-pointer hover:border-gray-600 transition"
+          style="border-radius:10px;">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-medium text-white truncate">${l.name || '-'}</span>
+          </div>
+          ${l.contact ? `<p class="text-xs text-gray-500 mb-1">📞 ${l.contact}</p>` : ''}
+          ${l.region ? `<p class="text-xs text-gray-500 mb-1">📍 ${l.region}</p>` : ''}
+          ${l.source ? `<p class="text-xs text-gray-600">📢 ${l.source}</p>` : ''}
+          ${l.budget ? `<p class="text-xs text-gray-600 mt-1">💰 ${Number(l.budget).toLocaleString()}원</p>` : ''}
+          <div class="mt-2 pt-2" style="border-top:1px solid #1f1f1f;">
+            <p class="text-xs text-gray-600">${new Date(l.created_at).toLocaleDateString('ko-KR')}</p>
+          </div>
+        </div>`).join('') || `<p class="text-xs text-gray-700 text-center py-6">없음</p>`
+    })
+  }
+
+  async function dropLead(event, newStatus) {
+    event.preventDefault()
+    if (!dragLeadId) return
+    const lead = allLeads.find(l => l.id === dragLeadId)
+    if (!lead || lead.status === newStatus) return
+    await sb.from('leads').update({ status: newStatus }).eq('id', dragLeadId)
+    await sb.from('lead_logs').insert({
+      lead_id: dragLeadId,
+      status_changed_to: newStatus,
+      note: `파이프라인에서 이동: ${lead.status} → ${newStatus}`
+    })
+    dragLeadId = null
+    await loadLeads()
+    renderPipeline()
+  }
 </script>
 
 </body>
