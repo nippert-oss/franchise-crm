@@ -29,24 +29,22 @@
       #mobileTab { display: flex; }
       #mainContent { margin-left: 0 !important; }
     }
-    @media (min-width: 769px) {
-      #mobileTab { display: none; }
-    }
+    @media (min-width: 769px) { #mobileTab { display: none; } }
   </style>
 </head>
 <body class="bg-black text-white min-h-screen">
 
-<!-- 로그인 화면 -->
-<div id="loginScreen" class="min-h-screen flex items-center justify-center px-6" style="background: radial-gradient(ellipse at center, #0f1a2e 0%, #000 70%);">
+<!-- 로그인 -->
+<div id="loginScreen" class="min-h-screen flex items-center justify-center px-6" style="background:radial-gradient(ellipse at center,#0f1a2e 0%,#000 70%);">
   <div class="w-full max-w-sm">
     <div class="text-center mb-10">
       <div class="inline-flex items-center gap-2 mb-4">
         <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm font-bold">정</div>
-        <span class="text-xl font-bold tracking-tight">정총무 CRM</span>
+        <span class="text-xl font-bold">정총무 CRM</span>
       </div>
       <p class="text-gray-500 text-sm">프랜차이즈 가맹영업 관리 플랫폼</p>
     </div>
-    <div style="background:#0d0d0d; border:1px solid #1f1f1f; border-radius:20px; padding:28px;">
+    <div style="background:#0d0d0d;border:1px solid #1f1f1f;border-radius:20px;padding:28px;">
       <div class="space-y-4">
         <div>
           <label class="text-xs text-gray-500 mb-1.5 block uppercase tracking-wider">이메일</label>
@@ -54,12 +52,9 @@
         </div>
         <div>
           <label class="text-xs text-gray-500 mb-1.5 block uppercase tracking-wider">비밀번호</label>
-          <input id="password" type="password" placeholder="••••••••" class="input-field"
-            onkeydown="if(event.key==='Enter') login()" />
+          <input id="password" type="password" placeholder="••••••••" class="input-field" onkeydown="if(event.key==='Enter') login()" />
         </div>
-        <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl py-3 text-sm font-medium transition mt-2">
-          로그인
-        </button>
+        <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl py-3 text-sm font-medium transition">로그인</button>
         <p id="errorMsg" class="text-red-400 text-xs text-center hidden">이메일 또는 비밀번호를 확인해주세요.</p>
       </div>
     </div>
@@ -70,7 +65,7 @@
 <div id="app" class="hidden min-h-screen flex">
 
   <!-- 사이드바 -->
-  <div id="sidebar" class="w-56 flex-shrink-0 flex flex-col" style="background:#080808; border-right:1px solid #1a1a1a; position:fixed; top:0; left:0; bottom:0; z-index:50;">
+  <div id="sidebar" class="w-56 flex-shrink-0 flex flex-col" style="background:#080808;border-right:1px solid #1a1a1a;position:fixed;top:0;left:0;bottom:0;z-index:50;">
     <div class="p-5 border-b" style="border-color:#1a1a1a;">
       <div class="flex items-center gap-2">
         <div class="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center text-xs font-bold">정</div>
@@ -87,13 +82,13 @@
         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
         <span class="text-sm">리드 관리</span>
       </div>
-      <div onclick="showScreen('brands')" id="nav-brands" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-gray-400">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-        <span class="text-sm">고객사</span>
-      </div>
       <div onclick="showScreen('pipeline')" id="nav-pipeline" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-gray-400">
         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
         <span class="text-sm">파이프라인</span>
+      </div>
+      <div onclick="showScreen('upload')" id="nav-upload" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-gray-400">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        <span class="text-sm">DB 업로드</span>
       </div>
     </nav>
     <div class="p-3 border-t" style="border-color:#1a1a1a;">
@@ -106,9 +101,7 @@
 
   <!-- 메인 콘텐츠 -->
   <div id="mainContent" class="flex-1 flex flex-col" style="margin-left:224px;">
-
-    <!-- 헤더 -->
-    <div class="px-8 py-5 flex items-center justify-between" style="border-bottom:1px solid #1a1a1a; background:#080808; position:sticky; top:0; z-index:40;">
+    <div class="px-8 py-5 flex items-center justify-between" style="border-bottom:1px solid #1a1a1a;background:#080808;position:sticky;top:0;z-index:40;">
       <div class="flex items-center gap-3">
         <button id="backBtn" onclick="goBack()" class="hidden text-gray-500 hover:text-white transition">
           <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
@@ -119,7 +112,8 @@
         </div>
       </div>
       <div class="flex items-center gap-3">
-        <button onclick="loadLeads()" class="text-xs text-gray-400 hover:text-white border border-gray-800 hover:border-gray-600 px-3 py-1.5 rounded-lg transition">새로고침</button>
+        <button onclick="exportExcel()" class="text-xs text-green-400 border border-green-800 hover:border-green-600 px-3 py-1.5 rounded-lg transition">↓ 엑셀 내보내기</button>
+        <button onclick="loadLeads()" class="text-xs text-gray-400 hover:text-white border border-gray-800 px-3 py-1.5 rounded-lg transition">새로고침</button>
         <button onclick="showAddLead()" class="btn-primary flex items-center gap-1.5">
           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
           리드 추가
@@ -131,7 +125,24 @@
 
       <!-- 대시보드 -->
       <div id="screenDashboard">
-        <div class="grid grid-cols-4 gap-4 mb-6">
+        <div class="mb-5 p-4 rounded-xl flex items-center justify-between" style="background:#0d0d0d;border:1px solid #1f1f1f;">
+          <div class="flex items-center gap-3">
+            <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+            <span class="text-xs text-gray-400">목표 전환율</span>
+            <span class="text-sm font-bold text-blue-400">5%</span>
+            <span class="text-xs text-gray-600">· 목표 계약</span>
+            <span id="targetContract" class="text-sm font-bold text-green-400">-건</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="text-right">
+              <p class="text-xs text-gray-600">현재 전환율</p>
+              <p id="currentRate" class="text-sm font-bold text-white">0%</p>
+            </div>
+            <div id="rateStatus" class="text-xs px-3 py-1 rounded-full"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-4 mb-5">
           <div class="kpi-card p-5">
             <p class="text-xs text-gray-500 mb-2">이번달 신규</p>
             <p id="kpiNew" class="text-4xl font-bold">-</p>
@@ -145,7 +156,15 @@
           <div class="kpi-card p-5">
             <p class="text-xs text-gray-500 mb-2">계약 완료</p>
             <p id="kpiDone" class="text-4xl font-bold text-green-400">-</p>
-            <p class="text-xs text-green-600 mt-2">이번달</p>
+            <div class="mt-2">
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-gray-600">목표 달성률</span>
+                <span id="contractAchieve" class="text-green-500">0%</span>
+              </div>
+              <div class="h-1 rounded-full" style="background:#1a1a1a">
+                <div id="contractProgress" class="h-1 rounded-full bg-green-500 transition-all" style="width:0%"></div>
+              </div>
+            </div>
           </div>
           <div class="kpi-card p-5">
             <p class="text-xs text-gray-500 mb-2">재접촉 대기</p>
@@ -153,15 +172,34 @@
             <p class="text-xs text-red-600 mt-2">즉시 연락 필요</p>
           </div>
         </div>
-        <div class="grid grid-cols-3 gap-4">
-          <div class="card p-6 col-span-1">
+
+        <div class="grid grid-cols-3 gap-4 mb-4">
+          <div class="card p-5">
             <p class="text-sm font-medium mb-4 text-gray-300">단계별 현황</p>
             <div id="stageChart" class="space-y-3"></div>
           </div>
-          <div class="card p-6 col-span-2">
+          <div class="card p-5">
+            <p class="text-sm font-medium mb-4 text-gray-300">영업 퍼널</p>
+            <div id="funnelChart" class="space-y-2"></div>
+          </div>
+          <div class="card p-5">
+            <p class="text-sm font-medium mb-4 text-gray-300">채널별 유입</p>
+            <div id="sourceChart" class="space-y-3"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+          <div class="card p-5">
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-sm font-medium text-red-400">⚠️ 재접촉 대기</p>
+              <span id="overdueCount" class="text-xs text-gray-600"></span>
+            </div>
+            <div id="overdueList" class="space-y-2"></div>
+          </div>
+          <div class="card p-5 col-span-2">
             <div class="flex items-center justify-between mb-4">
               <p class="text-sm font-medium text-gray-300">최근 리드</p>
-              <button onclick="showScreen('leads')" class="text-xs text-blue-400 hover:text-blue-300">전체보기 →</button>
+              <button onclick="showScreen('leads')" class="text-xs text-blue-400">전체보기 →</button>
             </div>
             <div id="recentLeads" class="space-y-1"></div>
           </div>
@@ -200,8 +238,6 @@
       <!-- 리드 상세 -->
       <div id="screenDetail" class="hidden">
         <div class="grid grid-cols-3 gap-4">
-
-          <!-- 왼쪽: 기본 정보 -->
           <div class="col-span-1 space-y-4">
             <div class="card p-5">
               <div class="flex items-center gap-3 mb-4">
@@ -212,202 +248,137 @@
                 </div>
               </div>
               <div class="space-y-3 text-sm">
-                <div class="flex justify-between">
-                  <span class="text-gray-500">연락처</span>
-                  <span id="detailContact" class="text-gray-200"></span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-500">지역</span>
-                  <span id="detailRegion" class="text-gray-200"></span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-500">채널</span>
-                  <span id="detailSource" class="text-gray-200"></span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-500">예산</span>
-                  <span id="detailBudget" class="text-gray-200"></span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-500">유입일</span>
-                  <span id="detailCreated" class="text-gray-200"></span>
-                </div>
+                <div class="flex justify-between"><span class="text-gray-500">연락처</span><span id="detailContact" class="text-gray-200"></span></div>
+                <div class="flex justify-between"><span class="text-gray-500">지역</span><span id="detailRegion" class="text-gray-200"></span></div>
+                <div class="flex justify-between"><span class="text-gray-500">채널</span><span id="detailSource" class="text-gray-200"></span></div>
+                <div class="flex justify-between"><span class="text-gray-500">예산</span><span id="detailBudget" class="text-gray-200"></span></div>
+                <div class="flex justify-between"><span class="text-gray-500">유입일</span><span id="detailCreated" class="text-gray-200"></span></div>
               </div>
             </div>
-
-            <!-- 단계 변경 -->
             <div class="card p-5">
               <p class="text-xs text-gray-500 mb-3 uppercase tracking-wider">단계 변경</p>
               <div class="space-y-2" id="stageButtons"></div>
             </div>
-
-            <!-- 재접촉일 설정 -->
             <div class="card p-5">
               <p class="text-xs text-gray-500 mb-3 uppercase tracking-wider">재접촉 예정일</p>
               <input type="date" id="nextContactDate" class="input-field mb-2" />
               <button onclick="saveNextContact()" class="btn-primary w-full text-center py-2">저장</button>
             </div>
           </div>
-
-          <!-- 오른쪽: 활동 로그 -->
           <div class="col-span-2 card p-5">
             <p class="text-sm font-medium mb-4 text-gray-300">활동 로그</p>
-
-            <!-- 로그 입력 -->
-            <div class="mb-5 space-y-3" style="background:#0d0d0d; border:1px solid #1f1f1f; border-radius:12px; padding:16px;">
+            <div class="mb-5 space-y-3" style="background:#0d0d0d;border:1px solid #1f1f1f;border-radius:12px;padding:16px;">
               <div class="flex gap-2 flex-wrap">
-                <button onclick="setResult('연결됨')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:border-blue-500 hover:text-blue-400">📞 연결됨</button>
-                <button onclick="setResult('부재중')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:border-yellow-500 hover:text-yellow-400">📵 부재중</button>
-                <button onclick="setResult('거절')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:border-red-500 hover:text-red-400">❌ 거절</button>
-                <button onclick="setResult('긍정')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:border-green-500 hover:text-green-400">✅ 긍정</button>
-                <button onclick="setResult('보류')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-300">⏸ 보류</button>
+                <button onclick="setResult('연결됨')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400">📞 연결됨</button>
+                <button onclick="setResult('부재중')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400">📵 부재중</button>
+                <button onclick="setResult('거절')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400">❌ 거절</button>
+                <button onclick="setResult('긍정')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400">✅ 긍정</button>
+                <button onclick="setResult('보류')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400">⏸ 보류</button>
               </div>
               <textarea id="logNote" class="input-field" rows="2" placeholder="메모 입력..."></textarea>
               <button onclick="addLog()" class="btn-primary px-4 py-2 text-xs">기록 추가</button>
             </div>
-
-            <!-- 로그 목록 -->
             <div id="logList" class="space-y-3"></div>
           </div>
         </div>
       </div>
 
-  <!-- 고객사 -->
-      <div id="screenBrands" class="hidden">
-        <div class="space-y-4">
-
-          <!-- CSV/엑셀 업로드 -->
-          <div class="card p-6">
-            <p class="text-sm font-medium mb-1 text-gray-300">엑셀 / CSV 업로드</p>
-            <p class="text-xs text-gray-500 mb-4">광고대행사에서 받은 DB를 업로드하면 자동으로 리드로 변환돼요</p>
-
-            <!-- 컬럼 매핑 안내 -->
-            <div class="mb-4 p-3 rounded-lg text-xs text-gray-400" style="background:#0d0d0d; border:1px solid #1f1f1f;">
-              <p class="font-medium text-gray-300 mb-2">📋 지원 컬럼명 (자동 인식)</p>
-              <div class="grid grid-cols-2 gap-1">
-                <p>이름, 성함, Name → <span class="text-blue-400">이름</span></p>
-                <p>연락처, 전화, 핸드폰, Phone → <span class="text-blue-400">연락처</span></p>
-                <p>지역, 희망지역, 지점 → <span class="text-blue-400">지역</span></p>
-                <p>예산, 투자금 → <span class="text-blue-400">예산</span></p>
-                <p>유입경로, 채널, 매체 → <span class="text-blue-400">채널</span></p>
-              </div>
-            </div>
-
-            <!-- 고객사 선택 -->
-            <div class="mb-3">
-              <label class="text-xs text-gray-500 mb-1 block">고객사 (브랜드)</label>
-              <select id="uploadBrand" class="input-field" style="max-width:300px;">
-                <option value="">선택 안함</option>
-                <option>와요커피</option>
-                <option>정총무 내부</option>
-              </select>
-            </div>
-
-            <!-- 파일 업로드 -->
-            <div id="dropZone"
-              class="border-2 border-dashed border-gray-700 rounded-xl p-8 text-center cursor-pointer hover:border-blue-600 transition mb-4"
-              onclick="document.getElementById('fileInput').click()"
-              ondragover="event.preventDefault(); this.style.borderColor='#3b82f6'"
-              ondragleave="this.style.borderColor='#374151'"
-              ondrop="handleDrop(event)">
-              <p class="text-gray-400 text-sm mb-1">📂 클릭하거나 파일을 드래그하세요</p>
-              <p class="text-gray-600 text-xs">.csv, .xlsx 파일 지원</p>
-              <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" class="hidden" onchange="handleFile(event)" />
-            </div>
-
-            <!-- 미리보기 -->
-            <div id="previewSection" class="hidden">
-              <div class="flex items-center justify-between mb-3">
-                <p class="text-sm font-medium text-gray-300">미리보기 <span id="previewCount" class="text-gray-500 text-xs"></span></p>
-                <div class="flex gap-2">
-                  <button onclick="clearUpload()" class="text-xs text-gray-500 border border-gray-700 px-3 py-1.5 rounded-lg hover:border-gray-500">취소</button>
-                  <button onclick="uploadLeads()" class="btn-primary text-xs px-4 py-1.5">리드로 가져오기</button>
-                </div>
-              </div>
-              <div class="card overflow-hidden">
-                <table class="w-full text-xs">
-                  <thead id="previewHead"></thead>
-                  <tbody id="previewBody"></tbody>
-                </table>
-              </div>
-            </div>
-
-            <!-- 결과 -->
-            <div id="uploadResult" class="hidden p-3 rounded-lg text-sm" style="background:#1a3a1a; border:1px solid #22c55e; color:#22c55e;"></div>
-          </div>
-
-        </div>
-      </div>
-
       <!-- 파이프라인 -->
       <div id="screenPipeline" class="hidden">
-        <div class="flex gap-3 overflow-x-auto pb-4" style="min-height: 600px;">
-
-          <!-- 신규 -->
+        <div class="flex gap-3 overflow-x-auto pb-4" style="min-height:600px;">
           <div class="flex-shrink-0 w-64">
             <div class="flex items-center justify-between mb-3">
               <span class="text-xs font-medium text-blue-400">신규</span>
               <span id="pipe-count-신규" class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span>
             </div>
-            <div id="pipe-신규" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d; border:1px dashed #1f1f1f;"
-              ondragover="event.preventDefault()" ondrop="dropLead(event, '신규')"></div>
+            <div id="pipe-신규" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d;border:1px dashed #1f1f1f;" ondragover="event.preventDefault()" ondrop="dropLead(event,'신규')"></div>
           </div>
-
-          <!-- 상담중 -->
           <div class="flex-shrink-0 w-64">
             <div class="flex items-center justify-between mb-3">
               <span class="text-xs font-medium text-yellow-400">상담중</span>
               <span id="pipe-count-상담중" class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span>
             </div>
-            <div id="pipe-상담중" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d; border:1px dashed #1f1f1f;"
-              ondragover="event.preventDefault()" ondrop="dropLead(event, '상담중')"></div>
+            <div id="pipe-상담중" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d;border:1px dashed #1f1f1f;" ondragover="event.preventDefault()" ondrop="dropLead(event,'상담중')"></div>
           </div>
-
-          <!-- 미팅준비 -->
           <div class="flex-shrink-0 w-64">
             <div class="flex items-center justify-between mb-3">
               <span class="text-xs font-medium text-orange-400">미팅준비</span>
               <span id="pipe-count-미팅준비" class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span>
             </div>
-            <div id="pipe-미팅준비" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d; border:1px dashed #1f1f1f;"
-              ondragover="event.preventDefault()" ondrop="dropLead(event, '미팅준비')"></div>
+            <div id="pipe-미팅준비" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d;border:1px dashed #1f1f1f;" ondragover="event.preventDefault()" ondrop="dropLead(event,'미팅준비')"></div>
           </div>
-
-          <!-- 계약검토 -->
           <div class="flex-shrink-0 w-64">
             <div class="flex items-center justify-between mb-3">
               <span class="text-xs font-medium text-purple-400">계약검토</span>
               <span id="pipe-count-계약검토" class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span>
             </div>
-            <div id="pipe-계약검토" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d; border:1px dashed #1f1f1f;"
-              ondragover="event.preventDefault()" ondrop="dropLead(event, '계약검토')"></div>
+            <div id="pipe-계약검토" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d;border:1px dashed #1f1f1f;" ondragover="event.preventDefault()" ondrop="dropLead(event,'계약검토')"></div>
           </div>
-
-          <!-- 완료 -->
           <div class="flex-shrink-0 w-64">
             <div class="flex items-center justify-between mb-3">
               <span class="text-xs font-medium text-green-400">완료</span>
               <span id="pipe-count-완료" class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span>
             </div>
-            <div id="pipe-완료" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d; border:1px dashed #1f1f1f;"
-              ondragover="event.preventDefault()" ondrop="dropLead(event, '완료')"></div>
+            <div id="pipe-완료" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d;border:1px dashed #1f1f1f;" ondragover="event.preventDefault()" ondrop="dropLead(event,'완료')"></div>
           </div>
-
-          <!-- 보류 -->
           <div class="flex-shrink-0 w-64">
             <div class="flex items-center justify-between mb-3">
               <span class="text-xs font-medium text-gray-400">보류</span>
               <span id="pipe-count-보류" class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span>
             </div>
-            <div id="pipe-보류" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d; border:1px dashed #1f1f1f;"
-              ondragover="event.preventDefault()" ondrop="dropLead(event, '보류')"></div>
+            <div id="pipe-보류" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d;border:1px dashed #1f1f1f;" ondragover="event.preventDefault()" ondrop="dropLead(event,'보류')"></div>
           </div>
-
         </div>
       </div>
 
-  <!-- 모바일 하단 탭 -->
-  <div id="mobileTab" class="fixed bottom-0 left-0 right-0 border-t z-50" style="background:#080808; border-color:#1a1a1a;">
+      <!-- DB 업로드 -->
+      <div id="screenUpload" class="hidden">
+        <div class="card p-6">
+          <p class="text-sm font-medium mb-1 text-gray-300">엑셀 / CSV 업로드</p>
+          <p class="text-xs text-gray-500 mb-4">광고대행사에서 받은 DB를 업로드하면 자동으로 리드로 변환돼요</p>
+          <div class="mb-4 p-3 rounded-lg text-xs text-gray-400" style="background:#0d0d0d;border:1px solid #1f1f1f;">
+            <p class="font-medium text-gray-300 mb-2">📋 지원 컬럼명 (자동 인식)</p>
+            <div class="grid grid-cols-2 gap-1">
+              <p>이름, 성함, Name → <span class="text-blue-400">이름</span></p>
+              <p>연락처, 전화, 핸드폰 → <span class="text-blue-400">연락처</span></p>
+              <p>지역, 희망지역 → <span class="text-blue-400">지역</span></p>
+              <p>예산, 투자금 → <span class="text-blue-400">예산</span></p>
+              <p>유입경로, 채널, 매체 → <span class="text-blue-400">채널</span></p>
+            </div>
+          </div>
+          <div id="dropZone" class="border-2 border-dashed border-gray-700 rounded-xl p-8 text-center cursor-pointer hover:border-blue-600 transition mb-4"
+            onclick="document.getElementById('fileInput').click()"
+            ondragover="event.preventDefault();this.style.borderColor='#3b82f6'"
+            ondragleave="this.style.borderColor='#374151'"
+            ondrop="handleDrop(event)">
+            <p class="text-gray-400 text-sm mb-1">📂 클릭하거나 파일을 드래그하세요</p>
+            <p class="text-gray-600 text-xs">.csv, .xlsx, .xls 파일 지원</p>
+            <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" class="hidden" onchange="handleFile(event)" />
+          </div>
+          <div id="previewSection" class="hidden">
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-sm font-medium text-gray-300">미리보기 <span id="previewCount" class="text-gray-500 text-xs"></span></p>
+              <div class="flex gap-2">
+                <button onclick="clearUpload()" class="text-xs text-gray-500 border border-gray-700 px-3 py-1.5 rounded-lg">취소</button>
+                <button onclick="uploadLeads()" class="btn-primary text-xs px-4 py-1.5">리드로 가져오기</button>
+              </div>
+            </div>
+            <div class="card overflow-hidden">
+              <table class="w-full text-xs">
+                <thead id="previewHead"></thead>
+                <tbody id="previewBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div id="uploadResult" class="hidden p-3 rounded-lg text-sm" style="background:#1a3a1a;border:1px solid #22c55e;color:#22c55e;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 모바일 탭 -->
+  <div id="mobileTab" class="fixed bottom-0 left-0 right-0 border-t z-50" style="background:#080808;border-color:#1a1a1a;">
     <div class="flex">
       <button onclick="showScreen('dashboard')" class="flex-1 py-3 flex flex-col items-center gap-1 text-blue-400">
         <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -417,13 +388,13 @@
         <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
         <span class="text-xs">리드</span>
       </button>
-      <button onclick="showScreen('brands')" class="flex-1 py-3 flex flex-col items-center gap-1 text-gray-500">
-        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-        <span class="text-xs">고객사</span>
-      </button>
       <button onclick="showScreen('pipeline')" class="flex-1 py-3 flex flex-col items-center gap-1 text-gray-500">
         <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
         <span class="text-xs">파이프라인</span>
+      </button>
+      <button onclick="showScreen('upload')" class="flex-1 py-3 flex flex-col items-center gap-1 text-gray-500">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        <span class="text-xs">업로드</span>
       </button>
     </div>
   </div>
@@ -437,42 +408,19 @@
       <button onclick="closeAddLead()" class="text-gray-500 hover:text-white">✕</button>
     </div>
     <div class="grid grid-cols-2 gap-3">
-      <div>
-        <label class="text-xs text-gray-500 mb-1 block">이름 *</label>
-        <input id="addName" class="input-field" placeholder="홍길동" />
-      </div>
-      <div>
-        <label class="text-xs text-gray-500 mb-1 block">연락처</label>
-        <input id="addContact" class="input-field" placeholder="010-0000-0000" />
-      </div>
-      <div>
-        <label class="text-xs text-gray-500 mb-1 block">지역</label>
-        <input id="addRegion" class="input-field" placeholder="서울 강남" />
-      </div>
-      <div>
-        <label class="text-xs text-gray-500 mb-1 block">채널</label>
+      <div><label class="text-xs text-gray-500 mb-1 block">이름 *</label><input id="addName" class="input-field" placeholder="홍길동" /></div>
+      <div><label class="text-xs text-gray-500 mb-1 block">연락처</label><input id="addContact" class="input-field" placeholder="010-0000-0000" /></div>
+      <div><label class="text-xs text-gray-500 mb-1 block">지역</label><input id="addRegion" class="input-field" placeholder="서울 강남" /></div>
+      <div><label class="text-xs text-gray-500 mb-1 block">채널</label>
         <select id="addSource" class="input-field">
           <option value="">선택</option>
-          <option>네이버</option>
-          <option>인스타</option>
-          <option>직접문의</option>
-          <option>지인소개</option>
-          <option>기타</option>
+          <option>네이버</option><option>인스타</option><option>직접문의</option><option>지인소개</option><option>기타</option>
         </select>
       </div>
-      <div>
-        <label class="text-xs text-gray-500 mb-1 block">예산</label>
-        <input id="addBudget" type="number" class="input-field" placeholder="50000000" />
-      </div>
-      <div>
-        <label class="text-xs text-gray-500 mb-1 block">단계</label>
+      <div><label class="text-xs text-gray-500 mb-1 block">예산</label><input id="addBudget" type="number" class="input-field" placeholder="50000000" /></div>
+      <div><label class="text-xs text-gray-500 mb-1 block">단계</label>
         <select id="addStatus" class="input-field">
-          <option>신규</option>
-          <option>상담중</option>
-          <option>미팅준비</option>
-          <option>계약검토</option>
-          <option>완료</option>
-          <option>보류</option>
+          <option>신규</option><option>상담중</option><option>미팅준비</option><option>계약검토</option><option>완료</option><option>보류</option>
         </select>
       </div>
     </div>
@@ -489,6 +437,7 @@
   let allLeads = []
   let currentLead = null
   let selectedResult = ''
+  let dragLeadId = null
 
   const statusColors = {
     '신규': '#1e3a5f|#3b82f6',
@@ -531,16 +480,12 @@
     allLeads = data || []
     renderDashboard()
     renderLeadsTable(allLeads)
+    renderPipeline()
   }
-async function loadLeads() {
-    const { data } = await sb.from('leads').select('*').order('created_at', { ascending: false })
-    allLeads = data || []
-    renderDashboard()
-    renderLeadsTable(allLeads)
-    renderPipeline()  // ← 이거 추가
-  }
+
   function renderDashboard() {
     const now = new Date()
+    const total = allLeads.length
     const newThisMonth = allLeads.filter(l => {
       const d = new Date(l.created_at)
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
@@ -550,10 +495,30 @@ async function loadLeads() {
       l.next_contact_at && new Date(l.next_contact_at) < now && l.status !== '완료'
     ).length
 
+    const targetContract = Math.max(1, Math.round(total * 0.05))
+    const currentRate = total > 0 ? ((done / total) * 100).toFixed(1) : 0
+    const achieveRate = Math.min(100, Math.round((done / targetContract) * 100))
+
     document.getElementById('kpiNew').textContent = newThisMonth
-    document.getElementById('kpiTotal').textContent = allLeads.length
+    document.getElementById('kpiTotal').textContent = total
     document.getElementById('kpiDone').textContent = done
     document.getElementById('kpiOverdue').textContent = overdue
+    document.getElementById('targetContract').textContent = targetContract + '건'
+    document.getElementById('currentRate').textContent = currentRate + '%'
+    document.getElementById('contractAchieve').textContent = achieveRate + '%'
+    document.getElementById('contractProgress').style.width = achieveRate + '%'
+
+    const rateEl = document.getElementById('rateStatus')
+    if (currentRate >= 5) {
+      rateEl.textContent = '🎯 목표 달성!'
+      rateEl.style.cssText = 'background:#1a3a1a;color:#22c55e;padding:4px 12px;border-radius:20px;'
+    } else if (currentRate >= 3) {
+      rateEl.textContent = '📈 순항중'
+      rateEl.style.cssText = 'background:#3a2e1a;color:#f59e0b;padding:4px 12px;border-radius:20px;'
+    } else {
+      rateEl.textContent = '💪 분발 필요'
+      rateEl.style.cssText = 'background:#3a1a1a;color:#ef4444;padding:4px 12px;border-radius:20px;'
+    }
 
     const stages = ['신규','상담중','미팅준비','계약검토','완료','보류']
     const max = Math.max(...stages.map(s => allLeads.filter(l => l.status === s).length), 1)
@@ -561,23 +526,45 @@ async function loadLeads() {
       const cnt = allLeads.filter(l => l.status === s).length
       const pct = Math.round((cnt / max) * 100)
       const [, color] = (statusColors[s] || '#1f1f1f|#6b7280').split('|')
-      return `<div>
-        <div class="flex justify-between text-xs mb-1">
-          <span class="text-gray-400">${s}</span>
-          <span class="text-gray-500">${cnt}</span>
-        </div>
-        <div class="h-1.5 rounded-full" style="background:#1a1a1a">
-          <div class="h-1.5 rounded-full" style="width:${pct}%;background:${color}"></div>
-        </div>
-      </div>`
+      return `<div><div class="flex justify-between text-xs mb-1"><span class="text-gray-400">${s}</span><span class="text-gray-500">${cnt}</span></div><div class="h-1.5 rounded-full" style="background:#1a1a1a"><div class="h-1.5 rounded-full" style="width:${pct}%;background:${color}"></div></div></div>`
     }).join('')
 
-    document.getElementById('recentLeads').innerHTML = allLeads.slice(0, 5).map(l => `
+    const funnelStages = [
+      { label: '전체 리드', key: null, color: '#3b82f6' },
+      { label: '상담 진입', key: ['상담중','미팅준비','계약검토','완료'], color: '#f59e0b' },
+      { label: '미팅 진입', key: ['미팅준비','계약검토','완료'], color: '#f97316' },
+      { label: '계약 검토', key: ['계약검토','완료'], color: '#a855f7' },
+      { label: '계약 완료', key: ['완료'], color: '#22c55e' },
+    ]
+    document.getElementById('funnelChart').innerHTML = funnelStages.map((f, i) => {
+      const cnt = f.key ? allLeads.filter(l => f.key.includes(l.status)).length : total
+      const pct = total > 0 ? Math.round((cnt / total) * 100) : 0
+      return `<div><div class="flex justify-between text-xs mb-1"><span class="text-gray-400">${f.label}</span><span class="text-gray-500">${cnt}건${i>0?' ('+pct+'%)':''}</span></div><div class="h-2 rounded-full" style="background:#1a1a1a"><div class="h-2 rounded-full" style="width:${i===0?100:pct}%;background:${f.color}"></div></div></div>`
+    }).join('')
+
+    const sources = {}
+    allLeads.forEach(l => { const s = l.source || '미분류'; sources[s] = (sources[s]||0)+1 })
+    const sortedSources = Object.entries(sources).sort((a,b) => b[1]-a[1])
+    const maxSource = sortedSources[0]?.[1] || 1
+    document.getElementById('sourceChart').innerHTML = sortedSources.length
+      ? sortedSources.map(([src,cnt]) => `<div><div class="flex justify-between text-xs mb-1"><span class="text-gray-400">${src}</span><span class="text-gray-500">${cnt}건</span></div><div class="h-1.5 rounded-full" style="background:#1a1a1a"><div class="h-1.5 rounded-full bg-blue-500" style="width:${Math.round((cnt/maxSource)*100)}%"></div></div></div>`).join('')
+      : '<p class="text-xs text-gray-600">데이터 없음</p>'
+
+    const overdueLeads = allLeads.filter(l => l.next_contact_at && new Date(l.next_contact_at) < now && l.status !== '완료').slice(0,5)
+    document.getElementById('overdueCount').textContent = overdueLeads.length + '건'
+    document.getElementById('overdueList').innerHTML = overdueLeads.length
+      ? overdueLeads.map(l => {
+          const days = Math.floor((now - new Date(l.next_contact_at))/(1000*60*60*24))
+          return `<div onclick="openDetail('${l.id}')" class="p-2.5 rounded-lg cursor-pointer hover:bg-gray-900 transition" style="border:1px solid #2a1a1a;"><div class="flex items-center justify-between"><span class="text-xs font-medium">${l.name||'-'}</span><span class="text-xs text-red-400">${days}일 경과</span></div><p class="text-xs text-gray-600 mt-0.5">${l.contact||'-'}</p></div>`
+        }).join('')
+      : '<p class="text-xs text-gray-600 text-center py-4">재접촉 대기 없음 👍</p>'
+
+    document.getElementById('recentLeads').innerHTML = allLeads.slice(0,5).map(l => `
       <div class="lead-row flex items-center gap-4 px-3 py-2.5 rounded-lg" onclick="openDetail('${l.id}')" style="border-bottom:1px solid #111">
-        <span class="font-medium text-sm w-24 truncate">${l.name || '-'}</span>
-        <span class="text-xs text-gray-500 w-28 truncate">${l.contact || '-'}</span>
-        <span class="text-xs text-gray-500 w-20 truncate">${l.region || '-'}</span>
-        <span class="text-xs text-gray-500 flex-1">${l.source || '-'}</span>
+        <span class="font-medium text-sm w-24 truncate">${l.name||'-'}</span>
+        <span class="text-xs text-gray-500 w-28 truncate">${l.contact||'-'}</span>
+        <span class="text-xs text-gray-500 w-20 truncate">${l.region||'-'}</span>
+        <span class="text-xs text-gray-500 flex-1">${l.source||'-'}</span>
         ${getBadge(l.status)}
       </div>`).join('') || '<p class="text-xs text-gray-600 py-4 text-center">리드가 없습니다</p>'
   }
@@ -586,74 +573,85 @@ async function loadLeads() {
     document.getElementById('leadsTable').innerHTML = leads.length
       ? leads.map(l => `
         <tr class="lead-row" onclick="openDetail('${l.id}')" style="border-bottom:1px solid #111">
-          <td class="px-5 py-3 text-sm font-medium">${l.name || '-'}</td>
-          <td class="px-5 py-3 text-xs text-gray-400">${l.contact || '-'}</td>
-          <td class="px-5 py-3 text-xs text-gray-400">${l.region || '-'}</td>
-          <td class="px-5 py-3 text-xs text-gray-400">${l.source || '-'}</td>
-          <td class="px-5 py-3 text-xs text-gray-400">${l.budget ? Number(l.budget).toLocaleString()+'원' : '-'}</td>
+          <td class="px-5 py-3 text-sm font-medium">${l.name||'-'}</td>
+          <td class="px-5 py-3 text-xs text-gray-400">${l.contact||'-'}</td>
+          <td class="px-5 py-3 text-xs text-gray-400">${l.region||'-'}</td>
+          <td class="px-5 py-3 text-xs text-gray-400">${l.source||'-'}</td>
+          <td class="px-5 py-3 text-xs text-gray-400">${l.budget?Number(l.budget).toLocaleString()+'원':'-'}</td>
           <td class="px-5 py-3">${getBadge(l.status)}</td>
           <td class="px-5 py-3" onclick="event.stopPropagation()">
-            <select onchange="updateStatus('${l.id}', this.value)"
-              class="text-xs bg-transparent border border-gray-800 rounded px-2 py-1 text-gray-400">
-              ${['신규','상담중','미팅준비','계약검토','완료','보류'].map(s =>
-                `<option value="${s}" ${s===l.status?'selected':''}>${s}</option>`
-              ).join('')}
+            <select onchange="updateStatus('${l.id}',this.value)" class="text-xs bg-transparent border border-gray-800 rounded px-2 py-1 text-gray-400">
+              ${['신규','상담중','미팅준비','계약검토','완료','보류'].map(s=>`<option value="${s}" ${s===l.status?'selected':''}>${s}</option>`).join('')}
             </select>
           </td>
         </tr>`).join('')
       : `<tr><td colspan="7" class="px-5 py-10 text-center text-xs text-gray-600">리드가 없습니다</td></tr>`
   }
 
+  function renderPipeline() {
+    const stages = ['신규','상담중','미팅준비','계약검토','완료','보류']
+    stages.forEach(s => {
+      const leads = allLeads.filter(l => l.status === s)
+      document.getElementById('pipe-count-'+s).textContent = leads.length
+      document.getElementById('pipe-'+s).innerHTML = leads.map(l => `
+        <div draggable="true" ondragstart="dragLeadId='${l.id}'" onclick="openDetail('${l.id}')"
+          class="card p-3 cursor-pointer hover:border-gray-600 transition" style="border-radius:10px;">
+          <p class="text-sm font-medium text-white mb-1">${l.name||'-'}</p>
+          ${l.contact?`<p class="text-xs text-gray-500">📞 ${l.contact}</p>`:''}
+          ${l.region?`<p class="text-xs text-gray-500">📍 ${l.region}</p>`:''}
+          ${l.source?`<p class="text-xs text-gray-600">📢 ${l.source}</p>`:''}
+          ${l.budget?`<p class="text-xs text-gray-600 mt-1">💰 ${Number(l.budget).toLocaleString()}원</p>`:''}
+          <p class="text-xs text-gray-700 mt-2 pt-2" style="border-top:1px solid #1f1f1f">${new Date(l.created_at).toLocaleDateString('ko-KR')}</p>
+        </div>`).join('') || `<p class="text-xs text-gray-700 text-center py-6">없음</p>`
+    })
+  }
+
+  async function dropLead(event, newStatus) {
+    event.preventDefault()
+    if (!dragLeadId) return
+    const lead = allLeads.find(l => l.id === dragLeadId)
+    if (!lead || lead.status === newStatus) return
+    await sb.from('leads').update({ status: newStatus }).eq('id', dragLeadId)
+    await sb.from('lead_logs').insert({ lead_id: dragLeadId, status_changed_to: newStatus, note: `파이프라인 이동: ${lead.status} → ${newStatus}` })
+    dragLeadId = null
+    await loadLeads()
+  }
+
   async function openDetail(id) {
     currentLead = allLeads.find(l => l.id === id)
     if (!currentLead) return
-
-    document.getElementById('detailAvatar').textContent = (currentLead.name || '?')[0]
-    document.getElementById('detailName').textContent = currentLead.name || '-'
+    document.getElementById('detailAvatar').textContent = (currentLead.name||'?')[0]
+    document.getElementById('detailName').textContent = currentLead.name||'-'
     document.getElementById('detailBadge').innerHTML = getBadge(currentLead.status)
-    document.getElementById('detailContact').textContent = currentLead.contact || '-'
-    document.getElementById('detailRegion').textContent = currentLead.region || '-'
-    document.getElementById('detailSource').textContent = currentLead.source || '-'
+    document.getElementById('detailContact').textContent = currentLead.contact||'-'
+    document.getElementById('detailRegion').textContent = currentLead.region||'-'
+    document.getElementById('detailSource').textContent = currentLead.source||'-'
     document.getElementById('detailBudget').textContent = currentLead.budget ? Number(currentLead.budget).toLocaleString()+'원' : '-'
     document.getElementById('detailCreated').textContent = new Date(currentLead.created_at).toLocaleDateString('ko-KR')
-    if (currentLead.next_contact_at)
-      document.getElementById('nextContactDate').value = currentLead.next_contact_at.split('T')[0]
-
+    if (currentLead.next_contact_at) document.getElementById('nextContactDate').value = currentLead.next_contact_at.split('T')[0]
     document.getElementById('stageButtons').innerHTML = ['신규','상담중','미팅준비','계약검토','완료','보류'].map(s => {
-      const [bg, color] = (statusColors[s] || '#1f1f1f|#6b7280').split('|')
+      const [bg, color] = (statusColors[s]||'#1f1f1f|#6b7280').split('|')
       const isActive = s === currentLead.status
-      return `<button onclick="updateStatusDetail('${s}')"
-        class="w-full text-left text-xs px-3 py-2 rounded-lg transition"
-        style="background:${isActive ? bg : '#1a1a1a'};color:${isActive ? color : '#6b7280'};border:1px solid ${isActive ? color : '#2a2a2a'}">
-        ${isActive ? '✓ ' : ''}${s}
-      </button>`
+      return `<button onclick="updateStatusDetail('${s}')" class="w-full text-left text-xs px-3 py-2 rounded-lg transition" style="background:${isActive?bg:'#1a1a1a'};color:${isActive?color:'#6b7280'};border:1px solid ${isActive?color:'#2a2a2a'}">${isActive?'✓ ':''}${s}</button>`
     }).join('')
-
     await loadLogs()
     showScreen('detail')
     document.getElementById('backBtn').classList.remove('hidden')
   }
 
   async function loadLogs() {
-    const { data } = await sb.from('lead_logs')
-      .select('*')
-      .eq('lead_id', currentLead.id)
-      .order('created_at', { ascending: false })
-
+    const { data } = await sb.from('lead_logs').select('*').eq('lead_id', currentLead.id).order('created_at', { ascending: false })
     const logs = data || []
-    const resultColors = {
-      '연결됨': '#3b82f6', '부재중': '#f59e0b',
-      '거절': '#ef4444', '긍정': '#22c55e', '보류': '#6b7280'
-    }
+    const resultColors = { '연결됨':'#3b82f6','부재중':'#f59e0b','거절':'#ef4444','긍정':'#22c55e','보류':'#6b7280' }
     document.getElementById('logList').innerHTML = logs.length
       ? logs.map(log => `
-        <div class="log-item mb-3" style="border-color:${resultColors[log.contact_result] || '#1f1f1f'}">
+        <div class="log-item mb-3" style="border-color:${resultColors[log.contact_result]||'#1f1f1f'}">
           <div class="flex items-center gap-2 mb-1">
-            ${log.contact_result ? `<span class="text-xs font-medium" style="color:${resultColors[log.contact_result]}">${log.contact_result}</span>` : ''}
-            ${log.status_changed_to ? `<span class="text-xs text-gray-600">→ ${log.status_changed_to}</span>` : ''}
+            ${log.contact_result?`<span class="text-xs font-medium" style="color:${resultColors[log.contact_result]}">${log.contact_result}</span>`:''}
+            ${log.status_changed_to?`<span class="text-xs text-gray-600">→ ${log.status_changed_to}</span>`:''}
             <span class="text-xs text-gray-600 ml-auto">${new Date(log.created_at).toLocaleDateString('ko-KR')}</span>
           </div>
-          ${log.note ? `<p class="text-xs text-gray-400">${log.note}</p>` : ''}
+          ${log.note?`<p class="text-xs text-gray-400">${log.note}</p>`:''}
         </div>`).join('')
       : '<p class="text-xs text-gray-600">아직 활동 기록이 없습니다</p>'
   }
@@ -661,22 +659,20 @@ async function loadLeads() {
   function setResult(result) {
     selectedResult = result
     document.querySelectorAll('.result-btn').forEach(b => {
-      b.classList.remove('border-blue-500','text-blue-400','border-green-500','text-green-400','border-red-500','text-red-400','border-yellow-500','text-yellow-400')
+      b.style.borderColor = '#374151'; b.style.color = '#9ca3af'
     })
-    event.target.classList.add('border-blue-500','text-blue-400')
+    event.target.style.borderColor = '#3b82f6'
+    event.target.style.color = '#3b82f6'
   }
 
   async function addLog() {
     if (!currentLead) return
     const note = document.getElementById('logNote').value
     if (!note && !selectedResult) return alert('결과 또는 메모를 입력해주세요')
-    await sb.from('lead_logs').insert({
-      lead_id: currentLead.id,
-      contact_result: selectedResult || null,
-      note: note || null,
-    })
+    await sb.from('lead_logs').insert({ lead_id: currentLead.id, contact_result: selectedResult||null, note: note||null })
     document.getElementById('logNote').value = ''
     selectedResult = ''
+    document.querySelectorAll('.result-btn').forEach(b => { b.style.borderColor='#374151'; b.style.color='#9ca3af' })
     await loadLogs()
   }
 
@@ -687,11 +683,7 @@ async function loadLeads() {
 
   async function updateStatusDetail(status) {
     await sb.from('leads').update({ status }).eq('id', currentLead.id)
-    await sb.from('lead_logs').insert({
-      lead_id: currentLead.id,
-      status_changed_to: status,
-      note: `단계 변경: ${currentLead.status} → ${status}`
-    })
+    await sb.from('lead_logs').insert({ lead_id: currentLead.id, status_changed_to: status, note: `단계 변경: ${currentLead.status} → ${status}` })
     currentLead.status = status
     await loadLeads()
     openDetail(currentLead.id)
@@ -706,13 +698,10 @@ async function loadLeads() {
   }
 
   function filterLeads(status) {
-    document.querySelectorAll('.stage-btn').forEach(b => {
-      b.classList.remove('border-blue-600','text-blue-400')
-      b.classList.add('border-gray-800','text-gray-400')
-    })
+    document.querySelectorAll('.stage-btn').forEach(b => { b.classList.remove('border-blue-600','text-blue-400'); b.classList.add('border-gray-800','text-gray-400') })
     event.target.classList.add('border-blue-600','text-blue-400')
     event.target.classList.remove('border-gray-800','text-gray-400')
-    renderLeadsTable(status === '전체' ? allLeads : allLeads.filter(l => l.status === status))
+    renderLeadsTable(status==='전체' ? allLeads : allLeads.filter(l => l.status===status))
   }
 
   function goBack() {
@@ -721,16 +710,16 @@ async function loadLeads() {
   }
 
   function showScreen(name) {
-    ['dashboard','leads','detail','brands','pipeline'].forEach(s => {
-      document.getElementById('screen' + s.charAt(0).toUpperCase() + s.slice(1))?.classList.add('hidden')
-      document.getElementById('nav-' + s)?.classList.remove('active')
-      document.getElementById('nav-' + s)?.classList.add('text-gray-400')
+    ['dashboard','leads','detail','pipeline','upload'].forEach(s => {
+      document.getElementById('screen'+s.charAt(0).toUpperCase()+s.slice(1))?.classList.add('hidden')
+      document.getElementById('nav-'+s)?.classList.remove('active')
+      document.getElementById('nav-'+s)?.classList.add('text-gray-400')
     })
-    document.getElementById('screen' + name.charAt(0).toUpperCase() + name.slice(1))?.classList.remove('hidden')
-    document.getElementById('nav-' + name)?.classList.add('active')
-    document.getElementById('nav-' + name)?.classList.remove('text-gray-400')
-    const titles = { dashboard:'대시보드', leads:'리드 관리', detail:'리드 상세', brands:'고객사', pipeline:'파이프라인' }
-    document.getElementById('pageTitle').textContent = titles[name] || ''
+    document.getElementById('screen'+name.charAt(0).toUpperCase()+name.slice(1))?.classList.remove('hidden')
+    document.getElementById('nav-'+name)?.classList.add('active')
+    document.getElementById('nav-'+name)?.classList.remove('text-gray-400')
+    const titles = { dashboard:'대시보드', leads:'리드 관리', detail:'리드 상세', pipeline:'파이프라인', upload:'DB 업로드' }
+    document.getElementById('pageTitle').textContent = titles[name]||''
     if (name !== 'detail') document.getElementById('backBtn').classList.add('hidden')
   }
 
@@ -741,21 +730,16 @@ async function loadLeads() {
     const name = document.getElementById('addName').value
     if (!name) return alert('이름을 입력해주세요')
     await sb.from('leads').insert({
-      name,
-      contact: document.getElementById('addContact').value,
+      name, contact: document.getElementById('addContact').value,
       region: document.getElementById('addRegion').value,
       source: document.getElementById('addSource').value,
-      budget: document.getElementById('addBudget').value || null,
+      budget: document.getElementById('addBudget').value||null,
       status: document.getElementById('addStatus').value,
     })
     closeAddLead()
     await loadLeads()
   }
 
-  sb.auth.getSession().then(({ data }) => {
-    if (data.session) initApp(data.session.user)
-  })
-// ===== 엑셀/CSV 업로드 =====
   const colMap = {
     name: ['이름','성함','name','성명','고객명'],
     contact: ['연락처','전화','핸드폰','휴대폰','phone','tel','전화번호'],
@@ -763,12 +747,11 @@ async function loadLeads() {
     budget: ['예산','투자금','투자예산','자본금'],
     source: ['유입경로','채널','매체','출처','광고채널']
   }
-
   let parsedLeads = []
 
   function handleDrop(e) {
     e.preventDefault()
-    document.getElementById('dropZone').style.borderColor = '#374151'
+    document.getElementById('dropZone').style.borderColor='#374151'
     const file = e.dataTransfer.files[0]
     if (file) processFile(file)
   }
@@ -789,8 +772,7 @@ async function loadLeads() {
         const data = new Uint8Array(e.target.result)
         const workbook = XLSX.read(data, { type: 'array' })
         const sheet = workbook.Sheets[workbook.SheetNames[0]]
-        const csv = XLSX.utils.sheet_to_csv(sheet)
-        parseCSV(csv)
+        parseCSV(XLSX.utils.sheet_to_csv(sheet))
       }
       reader.readAsArrayBuffer(file)
     } else {
@@ -801,45 +783,28 @@ async function loadLeads() {
   function parseCSV(text) {
     const lines = text.trim().split('\n')
     if (lines.length < 2) return alert('데이터가 없습니다')
-    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''))
+    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g,''))
     const mapping = {}
-    headers.forEach((h, i) => {
+    headers.forEach((h,i) => {
       for (const [field, aliases] of Object.entries(colMap)) {
         if (aliases.some(a => h.includes(a))) mapping[field] = i
       }
     })
-    parsedLeads = lines.slice(1).filter(l => l.trim()).map(line => {
-      const cols = line.split(',').map(c => c.trim().replace(/"/g, ''))
+    parsedLeads = lines.slice(1).filter(l=>l.trim()).map(line => {
+      const cols = line.split(',').map(c=>c.trim().replace(/"/g,''))
       return {
-        name: mapping.name !== undefined ? cols[mapping.name] : null,
-        contact: mapping.contact !== undefined ? cols[mapping.contact] : null,
-        region: mapping.region !== undefined ? cols[mapping.region] : null,
-        budget: mapping.budget !== undefined ? (parseInt(cols[mapping.budget].replace(/[^0-9]/g, '')) || null) : null,
-        source: mapping.source !== undefined ? cols[mapping.source] : null,
+        name: mapping.name!==undefined ? cols[mapping.name] : null,
+        contact: mapping.contact!==undefined ? cols[mapping.contact] : null,
+        region: mapping.region!==undefined ? cols[mapping.region] : null,
+        budget: mapping.budget!==undefined ? (parseInt(cols[mapping.budget].replace(/[^0-9]/g,''))||null) : null,
+        source: mapping.source!==undefined ? cols[mapping.source] : null,
         status: '신규'
       }
-    }).filter(l => l.name)
-
-    if (parsedLeads.length === 0) return alert('이름 컬럼을 찾을 수 없습니다.\n컬럼명을 확인해주세요.')
-
-    document.getElementById('previewCount').textContent = `${parsedLeads.length}건`
-    document.getElementById('previewHead').innerHTML = `
-      <tr style="border-bottom:1px solid #1f1f1f;">
-        <th class="text-left px-4 py-2 text-gray-500">이름</th>
-        <th class="text-left px-4 py-2 text-gray-500">연락처</th>
-        <th class="text-left px-4 py-2 text-gray-500">지역</th>
-        <th class="text-left px-4 py-2 text-gray-500">채널</th>
-        <th class="text-left px-4 py-2 text-gray-500">예산</th>
-      </tr>`
-    document.getElementById('previewBody').innerHTML = parsedLeads.slice(0, 10).map(l => `
-      <tr style="border-bottom:1px solid #111;">
-        <td class="px-4 py-2 text-gray-300">${l.name || '-'}</td>
-        <td class="px-4 py-2 text-gray-400">${l.contact || '-'}</td>
-        <td class="px-4 py-2 text-gray-400">${l.region || '-'}</td>
-        <td class="px-4 py-2 text-gray-400">${l.source || '-'}</td>
-        <td class="px-4 py-2 text-gray-400">${l.budget ? l.budget.toLocaleString()+'원' : '-'}</td>
-      </tr>`).join('')
-
+    }).filter(l=>l.name)
+    if (!parsedLeads.length) return alert('이름 컬럼을 찾을 수 없습니다')
+    document.getElementById('previewCount').textContent = parsedLeads.length+'건'
+    document.getElementById('previewHead').innerHTML = `<tr style="border-bottom:1px solid #1f1f1f"><th class="text-left px-4 py-2 text-gray-500">이름</th><th class="text-left px-4 py-2 text-gray-500">연락처</th><th class="text-left px-4 py-2 text-gray-500">지역</th><th class="text-left px-4 py-2 text-gray-500">채널</th><th class="text-left px-4 py-2 text-gray-500">예산</th></tr>`
+    document.getElementById('previewBody').innerHTML = parsedLeads.slice(0,10).map(l=>`<tr style="border-bottom:1px solid #111"><td class="px-4 py-2 text-gray-300">${l.name||'-'}</td><td class="px-4 py-2 text-gray-400">${l.contact||'-'}</td><td class="px-4 py-2 text-gray-400">${l.region||'-'}</td><td class="px-4 py-2 text-gray-400">${l.source||'-'}</td><td class="px-4 py-2 text-gray-400">${l.budget?l.budget.toLocaleString()+'원':'-'}</td></tr>`).join('')
     document.getElementById('previewSection').classList.remove('hidden')
     document.getElementById('uploadResult').classList.add('hidden')
   }
@@ -847,7 +812,7 @@ async function loadLeads() {
   async function uploadLeads() {
     if (!parsedLeads.length) return
     const { error } = await sb.from('leads').insert(parsedLeads)
-    if (error) { alert('오류: ' + error.message); return }
+    if (error) { alert('오류: '+error.message); return }
     document.getElementById('uploadResult').textContent = `✅ ${parsedLeads.length}건 리드 등록 완료!`
     document.getElementById('uploadResult').classList.remove('hidden')
     document.getElementById('previewSection').classList.add('hidden')
@@ -860,50 +825,24 @@ async function loadLeads() {
     document.getElementById('previewSection').classList.add('hidden')
     document.getElementById('fileInput').value = ''
   }
-  // ===== 파이프라인 =====
-  let dragLeadId = null
 
-  function renderPipeline() {
-    const stages = ['신규','상담중','미팅준비','계약검토','완료','보류']
-    stages.forEach(s => {
-      const leads = allLeads.filter(l => l.status === s)
-      document.getElementById('pipe-count-' + s).textContent = leads.length
-      document.getElementById('pipe-' + s).innerHTML = leads.map(l => `
-        <div draggable="true"
-          ondragstart="dragLeadId='${l.id}'"
-          onclick="openDetail('${l.id}')"
-          class="card p-3 cursor-pointer hover:border-gray-600 transition"
-          style="border-radius:10px;">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-sm font-medium text-white truncate">${l.name || '-'}</span>
-          </div>
-          ${l.contact ? `<p class="text-xs text-gray-500 mb-1">📞 ${l.contact}</p>` : ''}
-          ${l.region ? `<p class="text-xs text-gray-500 mb-1">📍 ${l.region}</p>` : ''}
-          ${l.source ? `<p class="text-xs text-gray-600">📢 ${l.source}</p>` : ''}
-          ${l.budget ? `<p class="text-xs text-gray-600 mt-1">💰 ${Number(l.budget).toLocaleString()}원</p>` : ''}
-          <div class="mt-2 pt-2" style="border-top:1px solid #1f1f1f;">
-            <p class="text-xs text-gray-600">${new Date(l.created_at).toLocaleDateString('ko-KR')}</p>
-          </div>
-        </div>`).join('') || `<p class="text-xs text-gray-700 text-center py-6">없음</p>`
-    })
+  function exportExcel() {
+    if (!allLeads.length) return alert('내보낼 데이터가 없습니다')
+    const rows = allLeads.map(l => ({
+      '이름': l.name||'', '연락처': l.contact||'', '지역': l.region||'',
+      '채널': l.source||'', '예산': l.budget||'', '단계': l.status||'',
+      '재접촉일': l.next_contact_at?l.next_contact_at.split('T')[0]:'',
+      '유입일': l.created_at?new Date(l.created_at).toLocaleDateString('ko-KR'):''
+    }))
+    const ws = XLSX.utils.json_to_sheet(rows)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, '리드목록')
+    XLSX.writeFile(wb, `정총무_리드_${new Date().toLocaleDateString('ko-KR').replace(/\./g,'').replace(/ /g,'')}.xlsx`)
   }
 
-  async function dropLead(event, newStatus) {
-    event.preventDefault()
-    if (!dragLeadId) return
-    const lead = allLeads.find(l => l.id === dragLeadId)
-    if (!lead || lead.status === newStatus) return
-    await sb.from('leads').update({ status: newStatus }).eq('id', dragLeadId)
-    await sb.from('lead_logs').insert({
-      lead_id: dragLeadId,
-      status_changed_to: newStatus,
-      note: `파이프라인에서 이동: ${lead.status} → ${newStatus}`
-    })
-    dragLeadId = null
-    await loadLeads()
-    renderPipeline()
-  }
+  sb.auth.getSession().then(({ data }) => {
+    if (data.session) initApp(data.session.user)
+  })
 </script>
-
 </body>
 </html>
