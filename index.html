@@ -1,957 +1,2262 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>정총무 CRM</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
-    * { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: #0f0f0f; }
-    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-    .sidebar-item { transition: all 0.15s; }
-    .sidebar-item:hover { background: #1a1a1a; }
-    .sidebar-item.active { background: #1e3a5f; border-left: 3px solid #3b82f6; }
-    .card { background: #111; border: 1px solid #1f1f1f; border-radius: 16px; }
-    .kpi-card { background: #0d0d0d; border: 1px solid #1f1f1f; border-radius: 12px; }
-    .lead-row:hover { background: #161616; cursor: pointer; }
-    .badge { border-radius: 6px; font-size: 11px; padding: 2px 8px; font-weight: 500; }
-    .btn-primary { background: #2563eb; color: white; border-radius: 8px; padding: 6px 14px; font-size: 13px; transition: all 0.15s; }
-    .btn-primary:hover { background: #1d4ed8; }
-    .input-field { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; color: white; padding: 8px 12px; font-size: 13px; outline: none; width: 100%; }
-    .input-field:focus { border-color: #3b82f6; }
-    .log-item { border-left: 2px solid #1f1f1f; padding-left: 12px; }
-    @media (max-width: 768px) {
-      #sidebar { display: none; }
-      #mobileTab { display: flex; }
-      #mainContent { margin-left: 0 !important; }
+    * {
+      font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
-    @media (min-width: 769px) { #mobileTab { display: none; } }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0f0f0f;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #333;
+      border-radius: 4px;
+    }
+
+    .sidebar-item {
+      transition: all 0.15s;
+    }
+
+    .sidebar-item:hover {
+      background: #1a1a1a;
+    }
+
+    .sidebar-item.active {
+      background: #1e3a5f;
+      border-left: 3px solid #3b82f6;
+    }
+
+    .card {
+      background: #111;
+      border: 1px solid #1f1f1f;
+      border-radius: 16px;
+    }
+
+    .kpi-card {
+      background: #0d0d0d;
+      border: 1px solid #1f1f1f;
+      border-radius: 12px;
+    }
+
+    .lead-row:hover {
+      background: #161616;
+      cursor: pointer;
+    }
+
+    .badge {
+      border-radius: 6px;
+      font-size: 11px;
+      padding: 2px 8px;
+      font-weight: 500;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    .input-field {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      color: white;
+      padding: 8px 12px;
+      font-size: 13px;
+      outline: none;
+      width: 100%;
+    }
+
+    .input-field:focus {
+      border-color: #3b82f6;
+    }
+
+    .log-item {
+      border-left: 2px solid #1f1f1f;
+      padding-left: 12px;
+    }
+
+    .float-btn {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #2563eb;
+      color: white;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+      z-index: 100;
+      cursor: pointer;
+    }
+
+    .mobile-card {
+      background: #111;
+      border: 1px solid #1f1f1f;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .mobile-card:active {
+      background: #161616;
+    }
+
+    .urgent-banner {
+      background: #3a1a1a;
+      border: 1px solid #ef4444;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+    }
+
+    /* PC 레이아웃 */
+    @media (min-width: 769px) {
+      #mobileView {
+        display: none !important;
+      }
+
+      #mobileTab {
+        display: none !important;
+      }
+
+      #floatBtn {
+        display: none !important;
+      }
+    }
+
+    /* 모바일 레이아웃 */
+    @media (max-width: 768px) {
+      #sidebar {
+        display: none !important;
+      }
+
+      #pcView {
+        display: none !important;
+      }
+
+      #mobileTab {
+        display: flex !important;
+      }
+
+      #mainContent {
+        margin-left: 0 !important;
+      }
+
+      #floatBtn {
+        display: flex !important;
+      }
+    }
   </style>
 </head>
+
 <body class="bg-black text-white min-h-screen">
 
-<!-- 로그인 -->
-<div id="loginScreen" class="min-h-screen flex items-center justify-center px-6" style="background:radial-gradient(ellipse at center,#0f1a2e 0%,#000 70%);">
-  <div class="w-full max-w-sm">
-    <div class="text-center mb-10">
-      <div class="inline-flex items-center gap-2 mb-4">
-        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm font-bold">정</div>
-        <span class="text-xl font-bold">정총무 CRM</span>
+  <!-- 로그인 -->
+  <div id="loginScreen" class="min-h-screen flex items-center justify-center px-6"
+    style="background:radial-gradient(ellipse at center,#0f1a2e 0%,#000 70%);">
+    <div class="w-full max-w-sm">
+      <div class="text-center mb-10">
+        <div class="inline-flex items-center gap-2 mb-4">
+          <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm font-bold">정</div>
+          <span class="text-xl font-bold">정총무 CRM</span>
+        </div>
+        <p class="text-gray-500 text-sm">프랜차이즈 가맹영업 관리 플랫폼</p>
       </div>
-      <p class="text-gray-500 text-sm">프랜차이즈 가맹영업 관리 플랫폼</p>
-    </div>
-    <div style="background:#0d0d0d;border:1px solid #1f1f1f;border-radius:20px;padding:28px;">
-      <div class="space-y-4">
-        <div>
-          <label class="text-xs text-gray-500 mb-1.5 block uppercase tracking-wider">이메일</label>
-          <input id="email" type="email" placeholder="name@company.com" class="input-field" />
+      <div style="background:#0d0d0d;border:1px solid #1f1f1f;border-radius:20px;padding:28px;">
+        <div class="space-y-4">
+          <div>
+            <label class="text-xs text-gray-500 mb-1.5 block uppercase tracking-wider">이메일</label>
+            <input id="email" type="email" placeholder="name@company.com" class="input-field" />
+          </div>
+          <div>
+            <label class="text-xs text-gray-500 mb-1.5 block uppercase tracking-wider">비밀번호</label>
+            <input id="password" type="password" placeholder="••••••••" class="input-field"
+              onkeydown="if(event.key==='Enter') login()" />
+          </div>
+          <button onclick="login()"
+            class="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl py-3 text-sm font-medium transition">로그인</button>
+          <p id="errorMsg" class="text-red-400 text-xs text-center hidden">이메일 또는 비밀번호를 확인해주세요.</p>
         </div>
-        <div>
-          <label class="text-xs text-gray-500 mb-1.5 block uppercase tracking-wider">비밀번호</label>
-          <input id="password" type="password" placeholder="••••••••" class="input-field" onkeydown="if(event.key==='Enter') login()" />
-        </div>
-        <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl py-3 text-sm font-medium transition">로그인</button>
-        <p id="errorMsg" class="text-red-400 text-xs text-center hidden">이메일 또는 비밀번호를 확인해주세요.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 초대 가입 화면 -->
-<div id="inviteScreen" class="hidden min-h-screen flex items-center justify-center px-6" style="background:radial-gradient(ellipse at center,#0f1a2e 0%,#000 70%);">
-  <div class="w-full max-w-sm">
-    <div class="text-center mb-10">
-      <div class="inline-flex items-center gap-2 mb-4">
-        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm font-bold">정</div>
-        <span class="text-xl font-bold">정총무 CRM</span>
-      </div>
-      <p class="text-gray-400 text-sm mt-1">초대를 받으셨군요! 아래에서 가입을 완료해주세요.</p>
-    </div>
-    <div style="background:#0d0d0d;border:1px solid #1f1f1f;border-radius:20px;padding:28px;">
-      <div class="space-y-4">
-        <div>
-          <label class="text-xs text-gray-500 mb-1.5 block uppercase tracking-wider">이름</label>
-          <input id="inviteName" type="text" placeholder="홍길동" class="input-field" />
-        </div>
-        <div>
-          <label class="text-xs text-gray-500 mb-1.5 block uppercase tracking-wider">비밀번호 설정</label>
-          <input id="invitePassword" type="password" placeholder="8자 이상" class="input-field" />
-        </div>
-        <button onclick="completeInvite()" class="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl py-3 text-sm font-medium transition">가입 완료</button>
-        <p id="inviteError" class="text-red-400 text-xs text-center hidden"></p>
       </div>
     </div>
   </div>
-</div>
 
-<!-- 메인 앱 -->
-<div id="app" class="hidden min-h-screen flex">
-
-  <!-- 사이드바 -->
-  <div id="sidebar" class="w-56 flex-shrink-0 flex flex-col" style="background:#080808;border-right:1px solid #1a1a1a;position:fixed;top:0;left:0;bottom:0;z-index:50;">
-    <div class="p-5 border-b" style="border-color:#1a1a1a;">
-      <div class="flex items-center gap-2">
-        <div class="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center text-xs font-bold">정</div>
-        <span class="font-bold text-sm">정총무 CRM</span>
+  <!-- 초대 가입 -->
+  <div id="inviteScreen" class="hidden min-h-screen flex items-center justify-center px-6"
+    style="background:radial-gradient(ellipse at center,#0f1a2e 0%,#000 70%);">
+    <div class="w-full max-w-sm">
+      <div class="text-center mb-10">
+        <div class="inline-flex items-center gap-2 mb-4">
+          <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm font-bold">정</div>
+          <span class="text-xl font-bold">정총무 CRM</span>
+        </div>
+        <p class="text-gray-400 text-sm mt-1">초대를 받으셨군요! 가입을 완료해주세요.</p>
       </div>
-      <p id="sidebarEmail" class="text-xs text-gray-600 mt-2 truncate"></p>
-      <div class="mt-3">
-        <select id="brandSelect" onchange="changeBrand(this.value)"
-          class="w-full text-xs rounded-lg px-2 py-1.5"
-          style="background:#1a1a1a;border:1px solid #2a2a2a;color:#9ca3af;outline:none;">
-          <option value="">전체 브랜드</option>
-        </select>
+      <div style="background:#0d0d0d;border:1px solid #1f1f1f;border-radius:20px;padding:28px;">
+        <div class="space-y-4">
+          <div><label class="text-xs text-gray-500 mb-1.5 block">이름</label><input id="inviteName" type="text"
+              placeholder="홍길동" class="input-field" /></div>
+          <div><label class="text-xs text-gray-500 mb-1.5 block">비밀번호 설정</label><input id="invitePassword"
+              type="password" placeholder="8자 이상" class="input-field" /></div>
+          <button onclick="completeInvite()"
+            class="w-full bg-blue-600 hover:bg-blue-500 text-white rounded-xl py-3 text-sm font-medium transition">가입
+            완료</button>
+          <p id="inviteError" class="text-red-400 text-xs text-center hidden"></p>
+        </div>
       </div>
-    </div>
-    <nav class="flex-1 p-3 space-y-1">
-      <div onclick="showScreen('dashboard')" id="nav-dashboard" class="sidebar-item active flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="text-blue-400"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        <span class="text-sm">대시보드</span>
-      </div>
-      <div onclick="showScreen('leads')" id="nav-leads" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-gray-400">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        <span class="text-sm">리드 관리</span>
-      </div>
-      <div onclick="showScreen('pipeline')" id="nav-pipeline" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-gray-400">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-        <span class="text-sm">파이프라인</span>
-      </div>
-      <div onclick="showScreen('brands')" id="nav-brands" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-gray-400">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-        <span class="text-sm">브랜드 관리</span>
-      </div>
-      <div onclick="showScreen('team')" id="nav-team" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-gray-400">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-        <span class="text-sm">팀 관리</span>
-      </div>
-      <div onclick="showScreen('upload')" id="nav-upload" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-gray-400">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-        <span class="text-sm">DB 업로드</span>
-      </div>
-    </nav>
-    <div class="p-3 border-t" style="border-color:#1a1a1a;">
-      <button onclick="logout()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-gray-900 transition text-sm">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-        로그아웃
-      </button>
     </div>
   </div>
 
-  <!-- 메인 콘텐츠 -->
-  <div id="mainContent" class="flex-1 flex flex-col" style="margin-left:224px;">
-    <div class="px-8 py-5 flex items-center justify-between" style="border-bottom:1px solid #1a1a1a;background:#080808;position:sticky;top:0;z-index:40;">
-      <div class="flex items-center gap-3">
-        <button id="backBtn" onclick="goBack()" class="hidden text-gray-500 hover:text-white transition">
-          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-        </button>
-        <div>
-          <h2 id="pageTitle" class="text-lg font-bold">대시보드</h2>
-          <p id="pageSubtitle" class="text-xs text-gray-500 mt-0.5">전체 영업 현황</p>
-        </div>
-      </div>
-      <div class="flex items-center gap-3">
-        <button onclick="exportExcel()" class="text-xs text-green-400 border border-green-800 hover:border-green-600 px-3 py-1.5 rounded-lg transition">↓ 엑셀 내보내기</button>
-        <button onclick="loadLeads()" class="text-xs text-gray-400 hover:text-white border border-gray-800 px-3 py-1.5 rounded-lg transition">새로고침</button>
-        <button onclick="showAddLead()" class="btn-primary flex items-center gap-1.5">
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-          리드 추가
-        </button>
-      </div>
-    </div>
+  <!-- 메인 앱 -->
+  <div id="app" class="hidden">
 
-    <div class="flex-1 overflow-auto p-8">
+    <!-- ===== PC 레이아웃 ===== -->
+    <div id="pcView" class="min-h-screen flex">
 
-      <!-- 대시보드 -->
-      <div id="screenDashboard">
-        <div class="mb-5 p-4 rounded-xl flex items-center justify-between" style="background:#0d0d0d;border:1px solid #1f1f1f;">
-          <div class="flex items-center gap-3">
-            <div class="w-2 h-2 rounded-full bg-blue-500"></div>
-            <span class="text-xs text-gray-400">목표 전환율</span>
-            <span class="text-sm font-bold text-blue-400">5%</span>
-            <span class="text-xs text-gray-600">· 목표 계약</span>
-            <span id="targetContract" class="text-sm font-bold text-green-400">-건</span>
+      <!-- 사이드바 -->
+      <div id="sidebar" class="w-56 flex-shrink-0 flex flex-col"
+        style="background:#080808;border-right:1px solid #1a1a1a;position:fixed;top:0;left:0;bottom:0;z-index:50;">
+        <div class="p-5 border-b" style="border-color:#1a1a1a;">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center text-xs font-bold">정</div>
+            <span class="font-bold text-sm">정총무 CRM</span>
           </div>
-          <div class="flex items-center gap-4">
-            <div class="text-right">
-              <p class="text-xs text-gray-600">현재 전환율</p>
-              <p id="currentRate" class="text-sm font-bold text-white">0%</p>
-            </div>
-            <div id="rateStatus" class="text-xs px-3 py-1 rounded-full"></div>
+          <p id="sidebarEmail" class="text-xs text-gray-600 mt-2 truncate"></p>
+          <div class="mt-3">
+            <select id="brandSelect" onchange="changeBrand(this.value)" class="w-full text-xs rounded-lg px-2 py-1.5"
+              style="background:#1a1a1a;border:1px solid #2a2a2a;color:#9ca3af;outline:none;">
+              <option value="">전체 브랜드</option>
+            </select>
           </div>
         </div>
-        <div class="grid grid-cols-4 gap-4 mb-5">
-          <div class="kpi-card p-5"><p class="text-xs text-gray-500 mb-2">이번달 신규</p><p id="kpiNew" class="text-4xl font-bold">-</p><p class="text-xs text-green-500 mt-2">↑ 이번달</p></div>
-          <div class="kpi-card p-5"><p class="text-xs text-gray-500 mb-2">전체 리드</p><p id="kpiTotal" class="text-4xl font-bold">-</p><p class="text-xs text-gray-600 mt-2">누적</p></div>
-          <div class="kpi-card p-5">
-            <p class="text-xs text-gray-500 mb-2">계약 완료</p>
-            <p id="kpiDone" class="text-4xl font-bold text-green-400">-</p>
-            <div class="mt-2"><div class="flex justify-between text-xs mb-1"><span class="text-gray-600">목표 달성률</span><span id="contractAchieve" class="text-green-500">0%</span></div><div class="h-1 rounded-full" style="background:#1a1a1a"><div id="contractProgress" class="h-1 rounded-full bg-green-500" style="width:0%"></div></div></div>
+        <nav class="flex-1 p-3 space-y-1">
+          <div onclick="showScreen('dashboard')" id="nav-dashboard"
+            class="sidebar-item active flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+              class="text-blue-400">
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+            <span class="text-sm">대시보드</span>
           </div>
-          <div class="kpi-card p-5"><p class="text-xs text-gray-500 mb-2">재접촉 대기</p><p id="kpiOverdue" class="text-4xl font-bold text-red-400">-</p><p class="text-xs text-red-600 mt-2">즉시 연락 필요</p></div>
-        </div>
-        <div class="grid grid-cols-3 gap-4 mb-4">
-          <div class="card p-5"><p class="text-sm font-medium mb-4 text-gray-300">단계별 현황</p><div id="stageChart" class="space-y-3"></div></div>
-          <div class="card p-5"><p class="text-sm font-medium mb-4 text-gray-300">영업 퍼널</p><div id="funnelChart" class="space-y-2"></div></div>
-          <div class="card p-5"><p class="text-sm font-medium mb-4 text-gray-300">채널별 유입</p><div id="sourceChart" class="space-y-3"></div></div>
-        </div>
-        <div class="grid grid-cols-3 gap-4">
-          <div class="card p-5">
-            <div class="flex items-center justify-between mb-3"><p class="text-sm font-medium text-red-400">⚠️ 재접촉 대기</p><span id="overdueCount" class="text-xs text-gray-600"></span></div>
-            <div id="overdueList" class="space-y-2"></div>
+          <div onclick="showScreen('leads')" id="nav-leads"
+            class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-gray-400">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+            </svg>
+            <span class="text-sm">리드 관리</span>
           </div>
-          <div class="card p-5 col-span-2">
-            <div class="flex items-center justify-between mb-4"><p class="text-sm font-medium text-gray-300">최근 리드</p><button onclick="showScreen('leads')" class="text-xs text-blue-400">전체보기 →</button></div>
-            <div id="recentLeads" class="space-y-1"></div>
+          <div onclick="showScreen('pipeline')" id="nav-pipeline"
+            class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-gray-400">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+            </svg>
+            <span class="text-sm">파이프라인</span>
           </div>
-        </div>
-      </div>
-
-      <!-- 리드 목록 -->
-      <div id="screenLeads" class="hidden">
-        <div class="flex items-center gap-2 mb-5 flex-wrap">
-          <button onclick="filterLeads('전체')" class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-blue-600 text-blue-400">전체</button>
-          <button onclick="filterLeads('신규')" class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-gray-800 text-gray-400">신규</button>
-          <button onclick="filterLeads('상담중')" class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-gray-800 text-gray-400">상담중</button>
-          <button onclick="filterLeads('미팅준비')" class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-gray-800 text-gray-400">미팅준비</button>
-          <button onclick="filterLeads('계약검토')" class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-gray-800 text-gray-400">계약검토</button>
-          <button onclick="filterLeads('완료')" class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-gray-800 text-gray-400">완료</button>
-          <button onclick="filterLeads('보류')" class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-gray-800 text-gray-400">보류</button>
-        </div>
-        <div class="card overflow-hidden">
-          <table class="w-full text-sm">
-            <thead><tr style="border-bottom:1px solid #1f1f1f;">
-              <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">이름</th>
-              <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">연락처</th>
-              <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">지역</th>
-              <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">채널</th>
-              <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">예산</th>
-              <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">단계</th>
-              <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">액션</th>
-            </tr></thead>
-            <tbody id="leadsTable"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- 리드 상세 -->
-      <div id="screenDetail" class="hidden">
-        <div class="grid grid-cols-3 gap-4">
-          <div class="col-span-1 space-y-4">
-            <div class="card p-5">
-              <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center text-blue-300 font-bold" id="detailAvatar"></div>
-                <div><p id="detailName" class="font-bold"></p><div id="detailBadge"></div></div>
-              </div>
-              <div class="space-y-3 text-sm">
-                <div class="flex justify-between"><span class="text-gray-500">연락처</span><span id="detailContact" class="text-gray-200"></span></div>
-                <div class="flex justify-between"><span class="text-gray-500">지역</span><span id="detailRegion" class="text-gray-200"></span></div>
-                <div class="flex justify-between"><span class="text-gray-500">채널</span><span id="detailSource" class="text-gray-200"></span></div>
-                <div class="flex justify-between"><span class="text-gray-500">예산</span><span id="detailBudget" class="text-gray-200"></span></div>
-                <div class="flex justify-between"><span class="text-gray-500">유입일</span><span id="detailCreated" class="text-gray-200"></span></div>
-              </div>
-            </div>
-            <div class="card p-5">
-              <p class="text-xs text-gray-500 mb-3 uppercase tracking-wider">단계 변경</p>
-              <div class="space-y-2" id="stageButtons"></div>
-            </div>
-            <div class="card p-5">
-              <p class="text-xs text-gray-500 mb-3 uppercase tracking-wider">재접촉 예정일</p>
-              <input type="date" id="nextContactDate" class="input-field mb-2" />
-              <button onclick="saveNextContact()" class="btn-primary w-full text-center py-2">저장</button>
-            </div>
+          <div onclick="showScreen('brands')" id="nav-brands"
+            class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-gray-400">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+            </svg>
+            <span class="text-sm">브랜드 관리</span>
           </div>
-          <div class="col-span-2 card p-5">
-            <p class="text-sm font-medium mb-4 text-gray-300">활동 로그</p>
-            <div class="mb-5 space-y-3" style="background:#0d0d0d;border:1px solid #1f1f1f;border-radius:12px;padding:16px;">
-              <div class="flex gap-2 flex-wrap">
-                <button onclick="setResult('연결됨')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400">📞 연결됨</button>
-                <button onclick="setResult('부재중')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400">📵 부재중</button>
-                <button onclick="setResult('거절')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400">❌ 거절</button>
-                <button onclick="setResult('긍정')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400">✅ 긍정</button>
-                <button onclick="setResult('보류')" class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400">⏸ 보류</button>
-              </div>
-              <textarea id="logNote" class="input-field" rows="2" placeholder="메모 입력..."></textarea>
-              <button onclick="addLog()" class="btn-primary px-4 py-2 text-xs">기록 추가</button>
-            </div>
-            <div id="logList" class="space-y-3"></div>
+          <div onclick="showScreen('team')" id="nav-team"
+            class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-gray-400">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+            </svg>
+            <span class="text-sm">팀 관리</span>
           </div>
-        </div>
-      </div>
-
-      <!-- 파이프라인 -->
-      <div id="screenPipeline" class="hidden">
-        <div class="flex gap-3 overflow-x-auto pb-4" style="min-height:600px;">
-          <div class="flex-shrink-0 w-64"><div class="flex items-center justify-between mb-3"><span class="text-xs font-medium text-blue-400">신규</span><span id="pipe-count-신규" class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span></div><div id="pipe-신규" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d;border:1px dashed #1f1f1f;" ondragover="event.preventDefault()" ondrop="dropLead(event,'신규')"></div></div>
-          <div class="flex-shrink-0 w-64"><div class="flex items-center justify-between mb-3"><span class="text-xs font-medium text-yellow-400">상담중</span><span id="pipe-count-상담중" class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span></div><div id="pipe-상담중" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d;border:1px dashed #1f1f1f;" ondragover="event.preventDefault()" ondrop="dropLead(event,'상담중')"></div></div>
-          <div class="flex-shrink-0 w-64"><div class="flex items-center justify-between mb-3"><span class="text-xs font-medium text-orange-400">미팅준비</span><span id="pipe-count-미팅준비" class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span></div><div id="pipe-미팅준비" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d;border:1px dashed #1f1f1f;" ondragover="event.preventDefault()" ondrop="dropLead(event,'미팅준비')"></div></div>
-          <div class="flex-shrink-0 w-64"><div class="flex items-center justify-between mb-3"><span class="text-xs font-medium text-purple-400">계약검토</span><span id="pipe-count-계약검토" class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span></div><div id="pipe-계약검토" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d;border:1px dashed #1f1f1f;" ondragover="event.preventDefault()" ondrop="dropLead(event,'계약검토')"></div></div>
-          <div class="flex-shrink-0 w-64"><div class="flex items-center justify-between mb-3"><span class="text-xs font-medium text-green-400">완료</span><span id="pipe-count-완료" class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span></div><div id="pipe-완료" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d;border:1px dashed #1f1f1f;" ondragover="event.preventDefault()" ondrop="dropLead(event,'완료')"></div></div>
-          <div class="flex-shrink-0 w-64"><div class="flex items-center justify-between mb-3"><span class="text-xs font-medium text-gray-400">보류</span><span id="pipe-count-보류" class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span></div><div id="pipe-보류" class="space-y-2 min-h-32 rounded-xl p-2" style="background:#0d0d0d;border:1px dashed #1f1f1f;" ondragover="event.preventDefault()" ondrop="dropLead(event,'보류')"></div></div>
-        </div>
-      </div>
-
-      <!-- 브랜드 관리 -->
-      <div id="screenBrands" class="hidden">
-        <div class="flex items-center justify-between mb-5">
-          <p class="text-sm text-gray-400">등록된 고객사 브랜드</p>
-          <button onclick="showAddBrand()" class="btn-primary flex items-center gap-1.5 text-xs">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-            브랜드 추가
+          <div onclick="showScreen('upload')" id="nav-upload"
+            class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-gray-400">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+            </svg>
+            <span class="text-sm">DB 업로드</span>
+          </div>
+        </nav>
+        <div class="p-3 border-t" style="border-color:#1a1a1a;">
+          <button onclick="logout()"
+            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-gray-900 transition text-sm">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
+            </svg>
+            로그아웃
           </button>
         </div>
-        <div id="brandList" class="grid grid-cols-3 gap-4"></div>
       </div>
 
-      <!-- 팀 관리 -->
-      <div id="screenTeam" class="hidden">
-        <div class="grid grid-cols-2 gap-4">
-
-          <!-- 팀원 목록 -->
-          <div class="card p-5">
-            <div class="flex items-center justify-between mb-4">
-              <p class="text-sm font-medium text-gray-300">팀원 목록</p>
+      <!-- PC 메인 콘텐츠 -->
+      <div id="mainContent" class="flex-1 flex flex-col" style="margin-left:224px;">
+        <div class="px-8 py-5 flex items-center justify-between"
+          style="border-bottom:1px solid #1a1a1a;background:#080808;position:sticky;top:0;z-index:40;">
+          <div class="flex items-center gap-3">
+            <button id="backBtn" onclick="goBack()" class="hidden text-gray-500 hover:text-white transition">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 5l-7 7 7 7" />
+              </svg>
+            </button>
+            <div>
+              <h2 id="pageTitle" class="text-lg font-bold">대시보드</h2>
+              <p id="pageSubtitle" class="text-xs text-gray-500 mt-0.5">전체 영업 현황</p>
             </div>
-            <div id="teamList" class="space-y-2"></div>
+          </div>
+          <div class="flex items-center gap-3">
+            <input id="searchInput" onkeyup="searchLeads()" placeholder="리드 검색..."
+              class="text-xs px-3 py-1.5 rounded-lg"
+              style="background:#1a1a1a;border:1px solid #2a2a2a;color:white;outline:none;width:160px;" />
+            <button id="deleteAllBtnPC" onclick="deleteSelectedLeads('pc')"
+              class="hidden text-xs text-red-400 border border-red-800 hover:border-red-600 px-3 py-1.5 rounded-lg transition">선택
+              삭제</button>
+            <button onclick="exportExcel()"
+              class="text-xs text-green-400 border border-green-800 hover:border-green-600 px-3 py-1.5 rounded-lg transition">↓
+              엑셀</button>
+            <button onclick="loadLeads()"
+              class="text-xs text-gray-400 hover:text-white border border-gray-800 px-3 py-1.5 rounded-lg transition">새로고침</button>
+            <button onclick="showAddLead()" class="btn-primary flex items-center gap-1.5">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              리드 추가
+            </button>
+          </div>
+        </div>
+
+        <div class="flex-1 overflow-auto p-8">
+
+          <!-- PC 대시보드 -->
+          <div id="screenDashboard">
+            <div class="mb-5 p-4 rounded-xl flex items-center justify-between"
+              style="background:#0d0d0d;border:1px solid #1f1f1f;">
+              <div class="flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                <span class="text-xs text-gray-400">목표 전환율</span>
+                <span class="text-sm font-bold text-blue-400">5%</span>
+                <span class="text-xs text-gray-600">· 목표 계약</span>
+                <span id="targetContract" class="text-sm font-bold text-green-400">-건</span>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="text-right">
+                  <p class="text-xs text-gray-600">현재 전환율</p>
+                  <p id="currentRate" class="text-sm font-bold text-white">0%</p>
+                </div>
+                <div id="rateStatus" class="text-xs px-3 py-1 rounded-full"></div>
+              </div>
+            </div>
+
+            <!-- 브랜드별 통합 현황 -->
+            <div class="mb-5">
+              <div class="flex items-center justify-between mb-3">
+                <p class="text-sm font-medium text-gray-300">브랜드별 현황</p>
+                <p class="text-xs text-gray-600">클릭 → 해당 브랜드 리드 보기</p>
+              </div>
+              <div id="brandDashboard" class="grid grid-cols-3 gap-4"></div>
+            </div>
+
+            <div class="grid grid-cols-4 gap-4 mb-5">
+              <div class="kpi-card p-5">
+                <p class="text-xs text-gray-500 mb-2">이번달 신규</p>
+                <p id="kpiNew" class="text-4xl font-bold">-</p>
+                <p class="text-xs text-green-500 mt-2">↑ 이번달</p>
+              </div>
+              <div class="kpi-card p-5">
+                <p class="text-xs text-gray-500 mb-2">전체 리드</p>
+                <p id="kpiTotal" class="text-4xl font-bold">-</p>
+                <p class="text-xs text-gray-600 mt-2">누적</p>
+              </div>
+              <div class="kpi-card p-5">
+                <p class="text-xs text-gray-500 mb-2">계약 완료</p>
+                <p id="kpiDone" class="text-4xl font-bold text-green-400">-</p>
+                <div class="mt-2">
+                  <div class="flex justify-between text-xs mb-1"><span class="text-gray-600">달성률</span><span
+                      id="contractAchieve" class="text-green-500">0%</span></div>
+                  <div class="h-1 rounded-full" style="background:#1a1a1a">
+                    <div id="contractProgress" class="h-1 rounded-full bg-green-500" style="width:0%"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="kpi-card p-5">
+                <p class="text-xs text-gray-500 mb-2">재접촉 대기</p>
+                <p id="kpiOverdue" class="text-4xl font-bold text-red-400">-</p>
+                <p class="text-xs text-red-600 mt-2">즉시 연락 필요</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 mb-4">
+              <div class="card p-5">
+                <p class="text-sm font-medium mb-4 text-gray-300">단계별 현황</p>
+                <div id="stageChart" class="space-y-3"></div>
+              </div>
+              <div class="card p-5">
+                <p class="text-sm font-medium mb-4 text-gray-300">영업 퍼널</p>
+                <div id="funnelChart" class="space-y-2"></div>
+              </div>
+              <div class="card p-5">
+                <p class="text-sm font-medium mb-4 text-gray-300">채널별 유입</p>
+                <div id="sourceChart" class="space-y-3"></div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4">
+              <div class="card p-5">
+                <div class="flex items-center justify-between mb-3">
+                  <p class="text-sm font-medium text-red-400">⚠️ 재접촉 대기</p><span id="overdueCount"
+                    class="text-xs text-gray-600"></span>
+                </div>
+                <div id="overdueList" class="space-y-2"></div>
+              </div>
+              <div class="card p-5 col-span-2">
+                <div class="flex items-center justify-between mb-4">
+                  <p class="text-sm font-medium text-gray-300">최근 리드</p><button onclick="showScreen('leads')"
+                    class="text-xs text-blue-400">전체보기 →</button>
+                </div>
+                <div id="recentLeads" class="space-y-1"></div>
+              </div>
+            </div>
           </div>
 
-          <!-- 초대하기 -->
-          <div class="card p-5">
-            <p class="text-sm font-medium text-gray-300 mb-4">팀원 초대</p>
-            <div class="space-y-3">
-              <div>
-                <label class="text-xs text-gray-500 mb-1 block">역할 선택</label>
-                <select id="inviteRole" class="input-field">
-                  <option value="manager">매니저 (정총무 직원)</option>
-                  <option value="viewer">뷰어 (고객사 열람용)</option>
-                  <option value="super_admin">슈퍼어드민</option>
-                </select>
-              </div>
-              <div>
-                <label class="text-xs text-gray-500 mb-1 block">브랜드 연결 (뷰어용)</label>
-                <select id="inviteBrandId" class="input-field">
-                  <option value="">선택 안함</option>
-                </select>
-              </div>
+          <!-- PC 리드 목록 -->
+          <div id="screenLeads" class="hidden">
+            <div class="flex items-center gap-2 mb-5 flex-wrap">
+              <button onclick="filterLeads('전체')"
+                class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-blue-600 text-blue-400">전체</button>
+              <button onclick="filterLeads('신규')"
+                class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-gray-800 text-gray-400">신규</button>
+              <button onclick="filterLeads('상담중')"
+                class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-gray-800 text-gray-400">상담중</button>
+              <button onclick="filterLeads('미팅준비')"
+                class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-gray-800 text-gray-400">미팅준비</button>
+              <button onclick="filterLeads('계약검토')"
+                class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-gray-800 text-gray-400">계약검토</button>
+              <button onclick="filterLeads('완료')"
+                class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-gray-800 text-gray-400">완료</button>
+              <button onclick="filterLeads('보류')"
+                class="stage-btn text-xs px-3 py-1.5 rounded-lg border border-gray-800 text-gray-400">보류</button>
+            </div>
+            <div class="card overflow-hidden">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr style="border-bottom:1px solid #1f1f1f;">
+                    <th class="w-10 px-5 py-3 text-left"><input type="checkbox" id="selectAllPC"
+                        onclick="toggleSelectAll(this.checked)"
+                        class="rounded border-gray-700 bg-gray-900 cursor-pointer hidden"></th>
+                    <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">이름</th>
+                    <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">인입일</th>
+                    <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">연락처</th>
+                    <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">지역</th>
+                    <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">채널</th>
+                    <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">예산</th>
+                    <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">단계</th>
+                    <th class="text-left px-5 py-3 text-xs text-gray-500 font-medium">액션</th>
+                  </tr>
+                </thead>
+                <tbody id="leadsTable"></tbody>
+              </table>
+            </div>
+          </div>
 
-              <!-- 초대 링크 생성 -->
-              <div class="p-3 rounded-xl" style="background:#0d0d0d;border:1px solid #1f1f1f;">
-                <p class="text-xs text-gray-400 mb-3">초대 링크 생성</p>
-                <button onclick="generateInviteLink()" class="btn-primary w-full py-2 text-xs text-center mb-3">🔗 초대 링크 생성</button>
-                <div id="inviteLinkBox" class="hidden">
-                  <div class="flex gap-2">
-                    <input id="inviteLinkInput" class="input-field text-xs" readonly />
-                    <button onclick="copyInviteLink()" class="btn-primary px-3 text-xs whitespace-nowrap">복사</button>
+          <!-- PC 리드 상세 -->
+          <div id="screenDetail" class="hidden">
+            <div class="grid grid-cols-3 gap-4">
+              <div class="col-span-1 space-y-4">
+                <div class="card p-5">
+                  <div class="flex items-center gap-3 mb-4">
+                    <div
+                      class="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center text-blue-300 font-bold"
+                      id="detailAvatar"></div>
+                    <div>
+                      <p id="detailName" class="font-bold"></p>
+                      <div id="detailBadge"></div>
+                    </div>
                   </div>
-                  <button onclick="shareKakao()" class="w-full mt-2 py-2 rounded-lg text-xs font-medium" style="background:#fee500;color:#3c1e1e;">
-                    카카오톡으로 공유
-                  </button>
-                  <p class="text-xs text-gray-600 mt-2 text-center">링크는 24시간 동안 유효합니다</p>
+                  <div class="space-y-3 text-sm">
+                    <div class="flex justify-between"><span class="text-gray-500">연락처</span><span id="detailContact"
+                        class="text-gray-200"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">지역</span><span id="detailRegion"
+                        class="text-gray-200"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">채널</span><span id="detailSource"
+                        class="text-gray-200"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">예산</span><span id="detailBudget"
+                        class="text-gray-200"></span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">유입일</span><span id="detailCreated"
+                        class="text-gray-200"></span></div>
+                  </div>
+                  <div class="mt-4 flex gap-2">
+                    <a id="callBtn" href="#" class="flex-1 text-center py-2 rounded-lg text-sm font-medium"
+                      style="background:#1a3a1a;color:#22c55e;">📞 전화</a>
+                    <a id="smsBtn" href="#" class="flex-1 text-center py-2 rounded-lg text-sm font-medium"
+                      style="background:#1e3a5f;color:#3b82f6;">💬 문자</a>
+                  </div>
+                </div>
+                <div class="card p-5">
+                  <p class="text-xs text-gray-500 mb-3 uppercase tracking-wider">단계 변경</p>
+                  <div class="space-y-2" id="stageButtons"></div>
+                </div>
+                <div class="card p-5">
+                  <p class="text-xs text-gray-500 mb-3 uppercase tracking-wider">재접촉 예정일</p>
+                  <input type="date" id="nextContactDate" class="input-field mb-2" />
+                  <button onclick="saveNextContact()" class="btn-primary w-full text-center py-2">저장</button>
+                </div>
+              </div>
+              <div class="col-span-2 card p-5">
+                <p class="text-sm font-medium mb-4 text-gray-300">활동 로그</p>
+                <div class="mb-5 space-y-3"
+                  style="background:#0d0d0d;border:1px solid #1f1f1f;border-radius:12px;padding:16px;">
+                  <div class="flex gap-2 flex-wrap">
+                    <button onclick="setResult('연결됨')"
+                      class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400">📞
+                      연결됨</button>
+                    <button onclick="setResult('부재중')"
+                      class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400">📵
+                      부재중</button>
+                    <button onclick="setResult('거절')"
+                      class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400">❌
+                      거절</button>
+                    <button onclick="setResult('긍정')"
+                      class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400">✅
+                      긍정</button>
+                    <button onclick="setResult('보류')"
+                      class="result-btn text-xs px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400">⏸
+                      보류</button>
+                  </div>
+                  <textarea id="logNote" class="input-field" rows="2" placeholder="메모 입력..."></textarea>
+                  <button onclick="addLog()" class="btn-primary px-4 py-2 text-xs">기록 추가</button>
+                </div>
+                <div id="logList" class="space-y-3"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PC 파이프라인 -->
+          <div id="screenPipeline" class="hidden">
+            <div class="flex gap-3 overflow-x-auto pb-4" style="min-height:600px;">
+              <div class="flex-shrink-0 w-64">
+                <div class="flex items-center justify-between mb-3"><span
+                    class="text-xs font-medium text-blue-400">신규</span><span id="pipe-count-신규"
+                    class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span></div>
+                <div id="pipe-신규" class="space-y-2 min-h-32 rounded-xl p-2"
+                  style="background:#0d0d0d;border:1px dashed #1f1f1f;" ondragover="event.preventDefault()"
+                  ondrop="dropLead(event,'신규')"></div>
+              </div>
+              <div class="flex-shrink-0 w-64">
+                <div class="flex items-center justify-between mb-3"><span
+                    class="text-xs font-medium text-yellow-400">상담중</span><span id="pipe-count-상담중"
+                    class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span></div>
+                <div id="pipe-상담중" class="space-y-2 min-h-32 rounded-xl p-2"
+                  style="background:#0d0d0d;border:1px dashed #1f1f1f;" ondragover="event.preventDefault()"
+                  ondrop="dropLead(event,'상담중')"></div>
+              </div>
+              <div class="flex-shrink-0 w-64">
+                <div class="flex items-center justify-between mb-3"><span
+                    class="text-xs font-medium text-orange-400">미팅준비</span><span id="pipe-count-미팅준비"
+                    class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span></div>
+                <div id="pipe-미팅준비" class="space-y-2 min-h-32 rounded-xl p-2"
+                  style="background:#0d0d0d;border:1px dashed #1f1f1f;" ondragover="event.preventDefault()"
+                  ondrop="dropLead(event,'미팅준비')"></div>
+              </div>
+              <div class="flex-shrink-0 w-64">
+                <div class="flex items-center justify-between mb-3"><span
+                    class="text-xs font-medium text-purple-400">계약검토</span><span id="pipe-count-계약검토"
+                    class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span></div>
+                <div id="pipe-계약검토" class="space-y-2 min-h-32 rounded-xl p-2"
+                  style="background:#0d0d0d;border:1px dashed #1f1f1f;" ondragover="event.preventDefault()"
+                  ondrop="dropLead(event,'계약검토')"></div>
+              </div>
+              <div class="flex-shrink-0 w-64">
+                <div class="flex items-center justify-between mb-3"><span
+                    class="text-xs font-medium text-green-400">완료</span><span id="pipe-count-완료"
+                    class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span></div>
+                <div id="pipe-완료" class="space-y-2 min-h-32 rounded-xl p-2"
+                  style="background:#0d0d0d;border:1px dashed #1f1f1f;" ondragover="event.preventDefault()"
+                  ondrop="dropLead(event,'완료')"></div>
+              </div>
+              <div class="flex-shrink-0 w-64">
+                <div class="flex items-center justify-between mb-3"><span
+                    class="text-xs font-medium text-gray-400">보류</span><span id="pipe-count-보류"
+                    class="text-xs text-gray-600 bg-gray-800 px-2 py-0.5 rounded-full">0</span></div>
+                <div id="pipe-보류" class="space-y-2 min-h-32 rounded-xl p-2"
+                  style="background:#0d0d0d;border:1px dashed #1f1f1f;" ondragover="event.preventDefault()"
+                  ondrop="dropLead(event,'보류')"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 브랜드 관리 -->
+          <div id="screenBrands" class="hidden">
+            <div class="flex items-center justify-between mb-5">
+              <p class="text-sm text-gray-400">등록된 고객사 브랜드</p>
+              <button onclick="showAddBrand()" class="btn-primary flex items-center gap-1.5 text-xs">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+                브랜드 추가
+              </button>
+            </div>
+            <div id="brandList" class="grid grid-cols-3 gap-4"></div>
+          </div>
+
+          <!-- 팀 관리 -->
+          <div id="screenTeam" class="hidden">
+            <div class="grid grid-cols-2 gap-4">
+              <div class="card p-5">
+                <p class="text-sm font-medium text-gray-300 mb-4">팀원 목록</p>
+                <div id="teamList" class="space-y-2"></div>
+              </div>
+              <div class="card p-5">
+                <p class="text-sm font-medium text-gray-300 mb-4">팀원 초대</p>
+                <div class="space-y-3">
+                  <div><label class="text-xs text-gray-500 mb-1 block">역할 선택</label>
+                    <select id="inviteRole" class="input-field">
+                      <option value="manager">매니저 (정총무 직원)</option>
+                      <option value="viewer">뷰어 (고객사 열람용)</option>
+                      <option value="super_admin">슈퍼어드민</option>
+                    </select>
+                  </div>
+                  <div><label class="text-xs text-gray-500 mb-1 block">브랜드 연결 (뷰어용)</label>
+                    <select id="inviteBrandId" class="input-field">
+                      <option value="">선택 안함</option>
+                    </select>
+                  </div>
+                  <div class="p-3 rounded-xl" style="background:#0d0d0d;border:1px solid #1f1f1f;">
+                    <p class="text-xs text-gray-400 mb-3">초대 링크 생성</p>
+                    <button onclick="generateInviteLink()" class="btn-primary w-full py-2 text-xs text-center mb-3">🔗
+                      초대 링크 생성</button>
+                    <div id="inviteLinkBox" class="hidden">
+                      <div class="flex gap-2">
+                        <input id="inviteLinkInput" class="input-field text-xs" readonly />
+                        <button onclick="copyInviteLink()"
+                          class="btn-primary px-3 text-xs whitespace-nowrap">복사</button>
+                      </div>
+                      <button onclick="shareKakao()" class="w-full mt-2 py-2 rounded-lg text-xs font-medium"
+                        style="background:#fee500;color:#3c1e1e;">카카오톡으로 공유</button>
+                      <p class="text-xs text-gray-600 mt-2 text-center">링크는 24시간 유효</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- DB 업로드 -->
-      <div id="screenUpload" class="hidden">
-        <div class="card p-6">
-          <p class="text-sm font-medium mb-1 text-gray-300">엑셀 / CSV 업로드</p>
-          <p class="text-xs text-gray-500 mb-4">광고대행사에서 받은 DB를 업로드하면 자동으로 리드로 변환돼요</p>
-          <div class="mb-4 p-3 rounded-lg text-xs text-gray-400" style="background:#0d0d0d;border:1px solid #1f1f1f;">
-            <p class="font-medium text-gray-300 mb-2">📋 지원 컬럼명 (자동 인식)</p>
-            <div class="grid grid-cols-2 gap-1">
-              <p>이름, 성함, Name → <span class="text-blue-400">이름</span></p>
-              <p>연락처, 전화, 핸드폰 → <span class="text-blue-400">연락처</span></p>
-              <p>지역, 희망지역 → <span class="text-blue-400">지역</span></p>
-              <p>예산, 투자금 → <span class="text-blue-400">예산</span></p>
-              <p>유입경로, 채널, 매체 → <span class="text-blue-400">채널</span></p>
+          <!-- DB 업로드 -->
+          <div id="screenUpload" class="hidden">
+            <div class="card p-6">
+              <div class="flex items-center justify-between mb-1">
+                <p class="text-sm font-medium text-gray-300">스마트 DB 업로드</p>
+                <button onclick="downloadTemplate()"
+                  class="text-xs text-blue-400 border border-blue-800 hover:border-blue-600 px-2 py-1.5 rounded-lg transition">양식
+                  다운로드</button>
+              </div>
+              <p class="text-xs text-gray-500 mb-4">어떤 형태의 엑셀이든 자동으로 인식해요. 모르는 컬럼만 직접 지정하면 돼요.</p>
+
+              <div class="mb-3">
+                <label class="text-xs text-gray-500 mb-1 block">브랜드 연결</label>
+                <select id="uploadBrandId" class="input-field" style="max-width:300px;">
+                  <option value="">선택 안함</option>
+                </select>
+              </div>
+
+              <!-- 파일 업로드 존 -->
+              <div id="dropZone"
+                class="border-2 border-dashed border-gray-700 rounded-xl p-8 text-center cursor-pointer hover:border-blue-600 transition mb-4"
+                onclick="document.getElementById('fileInput').click()"
+                ondragover="event.preventDefault();this.style.borderColor='#3b82f6'"
+                ondragleave="this.style.borderColor='#374151'" ondrop="handleDrop(event)">
+                <p class="text-gray-400 text-sm mb-1">📂 클릭하거나 파일을 드래그하세요</p>
+                <p class="text-gray-600 text-xs">.csv, .xlsx, .xls 파일 지원 · 어떤 헤더명이든 OK</p>
+                <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" class="hidden"
+                  onchange="handleFile(event)" />
+              </div>
+
+              <!-- 매핑 UI -->
+              <div id="mappingSection" class="hidden mb-4">
+                <div class="flex items-center justify-between mb-3">
+                  <p class="text-sm font-medium text-gray-300">컬럼 매핑 확인</p>
+                  <p class="text-xs text-gray-600">자동인식된 항목은 ✅, 모르는 항목만 직접 선택해주세요</p>
+                </div>
+                <div class="card overflow-hidden mb-3">
+                  <table class="w-full text-xs">
+                    <thead>
+                      <tr style="border-bottom:1px solid #1f1f1f;">
+                        <th class="text-left px-4 py-3 text-gray-500 font-medium">파일 헤더</th>
+                        <th class="text-left px-4 py-3 text-gray-500 font-medium">샘플 데이터</th>
+                        <th class="text-left px-4 py-3 text-gray-500 font-medium">CRM 필드</th>
+                      </tr>
+                    </thead>
+                    <tbody id="mappingTable"></tbody>
+                  </table>
+                </div>
+                <div class="flex gap-2 justify-end">
+                  <button onclick="clearUpload()"
+                    class="text-xs text-gray-500 border border-gray-700 px-3 py-1.5 rounded-lg">취소</button>
+                  <button onclick="applyMappingAndPreview()" class="btn-primary text-xs px-4 py-1.5">매핑 확인 →</button>
+                </div>
+              </div>
+
+              <!-- 미리보기 -->
+              <div id="previewSection" class="hidden">
+                <div class="flex items-center justify-between mb-3">
+                  <p class="text-sm font-medium text-gray-300">미리보기 <span id="previewCount"
+                      class="text-gray-500 text-xs"></span></p>
+                  <div class="flex gap-2">
+                    <button onclick="backToMapping()"
+                      class="text-xs text-gray-500 border border-gray-700 px-3 py-1.5 rounded-lg">← 매핑 수정</button>
+                    <button onclick="clearUpload()"
+                      class="text-xs text-gray-500 border border-gray-700 px-3 py-1.5 rounded-lg">취소</button>
+                    <button onclick="uploadLeads()" class="btn-primary text-xs px-4 py-1.5">리드로 가져오기</button>
+                  </div>
+                </div>
+                <div class="card overflow-hidden">
+                  <table class="w-full text-xs">
+                    <thead id="previewHead"></thead>
+                    <tbody id="previewBody"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div id="uploadResult" class="hidden p-3 rounded-lg text-sm"
+                style="background:#1a3a1a;border:1px solid #22c55e;color:#22c55e;"></div>
             </div>
           </div>
-          <div class="mb-3">
-            <label class="text-xs text-gray-500 mb-1 block">브랜드 연결</label>
-            <select id="uploadBrandId" class="input-field" style="max-width:300px;">
-              <option value="">선택 안함</option>
-            </select>
-          </div>
-          <div id="dropZone" class="border-2 border-dashed border-gray-700 rounded-xl p-8 text-center cursor-pointer hover:border-blue-600 transition mb-4"
-            onclick="document.getElementById('fileInput').click()"
-            ondragover="event.preventDefault();this.style.borderColor='#3b82f6'"
-            ondragleave="this.style.borderColor='#374151'"
-            ondrop="handleDrop(event)">
-            <p class="text-gray-400 text-sm mb-1">📂 클릭하거나 파일을 드래그하세요</p>
-            <p class="text-gray-600 text-xs">.csv, .xlsx, .xls 파일 지원</p>
-            <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" class="hidden" onchange="handleFile(event)" />
-          </div>
-          <div id="previewSection" class="hidden">
-            <div class="flex items-center justify-between mb-3">
-              <p class="text-sm font-medium text-gray-300">미리보기 <span id="previewCount" class="text-gray-500 text-xs"></span></p>
-              <div class="flex gap-2">
-                <button onclick="clearUpload()" class="text-xs text-gray-500 border border-gray-700 px-3 py-1.5 rounded-lg">취소</button>
-                <button onclick="uploadLeads()" class="btn-primary text-xs px-4 py-1.5">리드로 가져오기</button>
+
+          <!-- ===== 모바일 레이아웃 ===== -->
+          <div id="mobileView" class="min-h-screen pb-20">
+
+            <!-- 모바일 헤더 -->
+            <div class="px-4 py-3 flex items-center justify-between"
+              style="background:#080808;border-bottom:1px solid #1a1a1a;position:sticky;top:0;z-index:40;">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 bg-blue-600 rounded-md flex items-center justify-center text-xs font-bold">정</div>
+                <span id="mobilePage" class="font-bold text-sm">홈</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="toggleMobileSearch()"
+                  style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:6px 10px;color:#9ca3af;font-size:12px;">🔍</button>
+                <button onclick="showAddLead()"
+                  style="background:#2563eb;border-radius:8px;padding:6px 12px;color:white;font-size:12px;font-weight:500;">+
+                  추가</button>
               </div>
             </div>
-            <div class="card overflow-hidden">
-              <table class="w-full text-xs">
-                <thead id="previewHead"></thead>
-                <tbody id="previewBody"></tbody>
-              </table>
+
+            <!-- 모바일 검색바 -->
+            <div id="mobileSearchBar" class="hidden px-4 py-2"
+              style="background:#080808;border-bottom:1px solid #1a1a1a;">
+              <input id="mobileSearchInput" onkeyup="mobileSearchLeads()" placeholder="이름, 연락처 검색..."
+                class="input-field text-sm" style="border-radius:10px;" />
+            </div>
+
+            <!-- 모바일 홈 -->
+            <div id="mobileScreenHome" class="px-4 pt-4">
+
+              <!-- 재접촉 긴급 배너 -->
+              <div id="mobileUrgentBanner" class="hidden urgent-banner mb-3">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-xs font-bold text-red-400">⚠️ 오늘 재접촉 필요</p>
+                    <p id="mobileUrgentText" class="text-xs text-red-300 mt-0.5"></p>
+                  </div>
+                  <button onclick="showMobileScreen('leads')"
+                    style="background:#ef4444;border-radius:8px;padding:4px 10px;color:white;font-size:11px;">보기</button>
+                </div>
+              </div>
+
+              <!-- 모바일 KPI -->
+              <div class="grid grid-cols-2 gap-3 mb-4">
+                <div style="background:#0d0d0d;border:1px solid #1f1f1f;border-radius:14px;padding:14px;">
+                  <p class="text-xs text-gray-500 mb-1">내 리드</p>
+                  <p id="mKpiTotal" class="text-3xl font-bold">-</p>
+                  <p class="text-xs text-gray-600 mt-1">전체</p>
+                </div>
+                <div style="background:#0d0d0d;border:1px solid #1f1f1f;border-radius:14px;padding:14px;">
+                  <p class="text-xs text-gray-500 mb-1">이번달 신규</p>
+                  <p id="mKpiNew" class="text-3xl font-bold text-blue-400">-</p>
+                  <p class="text-xs text-gray-600 mt-1">신규 유입</p>
+                </div>
+                <div style="background:#0d0d0d;border:1px solid #1f1f1f;border-radius:14px;padding:14px;">
+                  <p class="text-xs text-gray-500 mb-1">계약 완료</p>
+                  <p id="mKpiDone" class="text-3xl font-bold text-green-400">-</p>
+                  <p class="text-xs text-green-600 mt-1">목표 달성률 <span id="mAchieve">0%</span></p>
+                </div>
+                <div style="background:#3a1a1a;border:1px solid #ef4444;border-radius:14px;padding:14px;">
+                  <p class="text-xs text-red-400 mb-1">재접촉 대기</p>
+                  <p id="mKpiOverdue" class="text-3xl font-bold text-red-400">-</p>
+                  <p class="text-xs text-red-600 mt-1">즉시 연락 필요</p>
+                </div>
+              </div>
+
+              <!-- 단계별 현황 -->
+              <div style="background:#111;border:1px solid #1f1f1f;border-radius:14px;padding:14px;margin-bottom:14px;">
+                <p class="text-xs font-medium text-gray-300 mb-3">단계별 현황</p>
+                <div id="mStageChart" class="space-y-2"></div>
+              </div>
+
+              <!-- 오늘 할 일 -->
+              <div style="background:#111;border:1px solid #1f1f1f;border-radius:14px;padding:14px;">
+                <p class="text-xs font-medium text-gray-300 mb-3">🔥 오늘 재접촉 대기</p>
+                <div id="mTodayList" class="space-y-2"></div>
+              </div>
+            </div>
+
+            <!-- 모바일 리드 목록 -->
+            <div id="mobileScreenLeads" class="hidden px-4 pt-4">
+              <!-- 단계 필터 -->
+              <div class="flex gap-2 overflow-x-auto pb-2 mb-3" style="scrollbar-width:none;">
+                <button onclick="mobileFilterLeads('전체')"
+                  class="mobile-stage-btn flex-shrink-0 text-xs px-3 py-1.5 rounded-full"
+                  style="background:#1e3a5f;color:#3b82f6;border:1px solid #3b82f6;">전체</button>
+                <button onclick="mobileFilterLeads('신규')"
+                  class="mobile-stage-btn flex-shrink-0 text-xs px-3 py-1.5 rounded-full"
+                  style="background:#1a1a1a;color:#6b7280;border:1px solid #2a2a2a;">신규</button>
+                <button onclick="mobileFilterLeads('상담중')"
+                  class="mobile-stage-btn flex-shrink-0 text-xs px-3 py-1.5 rounded-full"
+                  style="background:#1a1a1a;color:#6b7280;border:1px solid #2a2a2a;">상담중</button>
+                <button onclick="mobileFilterLeads('미팅준비')"
+                  class="mobile-stage-btn flex-shrink-0 text-xs px-3 py-1.5 rounded-full"
+                  style="background:#1a1a1a;color:#6b7280;border:1px solid #2a2a2a;">미팅준비</button>
+                <button onclick="mobileFilterLeads('계약검토')"
+                  class="mobile-stage-btn flex-shrink-0 text-xs px-3 py-1.5 rounded-full"
+                  style="background:#1a1a1a;color:#6b7280;border:1px solid #2a2a2a;">계약검토</button>
+                <button onclick="mobileFilterLeads('완료')"
+                  class="mobile-stage-btn flex-shrink-0 text-xs px-3 py-1.5 rounded-full"
+                  style="background:#1a1a1a;color:#6b7280;border:1px solid #2a2a2a;">완료</button>
+                <button onclick="mobileFilterLeads('보류')"
+                  class="mobile-stage-btn flex-shrink-0 text-xs px-3 py-1.5 rounded-full"
+                  style="background:#1a1a1a;color:#6b7280;border:1px solid #2a2a2a;">보류</button>
+              </div>
+              <div id="mobileLeadsList" class="space-y-2"></div>
+            </div>
+
+            <!-- 모바일 리드 상세 -->
+            <div id="mobileScreenDetail" class="hidden px-4 pt-4">
+              <button onclick="showMobileScreen('leads')" class="flex items-center gap-2 text-gray-400 text-sm mb-4">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path d="M19 12H5M12 5l-7 7 7 7" />
+                </svg>
+                뒤로
+              </button>
+
+              <!-- 상단 정보 -->
+              <div class="mobile-card mb-3">
+                <div class="flex items-center gap-3 mb-3">
+                  <div
+                    class="w-12 h-12 rounded-full bg-blue-900 flex items-center justify-center text-blue-300 font-bold text-lg"
+                    id="mDetailAvatar"></div>
+                  <div>
+                    <p id="mDetailName" class="font-bold text-lg"></p>
+                    <div id="mDetailBadge"></div>
+                  </div>
+                </div>
+                <!-- 전화/문자 버튼 크게 -->
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                  <a id="mCallBtn" href="#"
+                    class="flex items-center justify-center gap-2 py-3 rounded-xl font-medium text-sm"
+                    style="background:#1a3a1a;color:#22c55e;">
+                    📞 전화하기
+                  </a>
+                  <a id="mSmsBtn" href="#"
+                    class="flex items-center justify-center gap-2 py-3 rounded-xl font-medium text-sm"
+                    style="background:#1e3a5f;color:#3b82f6;">
+                    💬 문자하기
+                  </a>
+                </div>
+                <div class="space-y-2 text-sm">
+                  <div class="flex justify-between"><span class="text-gray-500">지역</span><span id="mDetailRegion"
+                      class="text-gray-200"></span></div>
+                  <div class="flex justify-between"><span class="text-gray-500">채널</span><span id="mDetailSource"
+                      class="text-gray-200"></span></div>
+                  <div class="flex justify-between"><span class="text-gray-500">예산</span><span id="mDetailBudget"
+                      class="text-gray-200"></span></div>
+                  <div class="flex justify-between"><span class="text-gray-500">유입일</span><span id="mDetailCreated"
+                      class="text-gray-200"></span></div>
+                </div>
+              </div>
+
+              <!-- 단계 변경 (가로 스크롤) -->
+              <div class="mobile-card mb-3">
+                <p class="text-xs text-gray-500 mb-2 uppercase tracking-wider">단계 변경</p>
+                <div class="flex gap-2 overflow-x-auto pb-1" style="scrollbar-width:none;">
+                  <div id="mStageButtons" class="flex gap-2"></div>
+                </div>
+              </div>
+
+              <!-- 재접촉일 -->
+              <div class="mobile-card mb-3">
+                <p class="text-xs text-gray-500 mb-2 uppercase tracking-wider">재접촉 예정일</p>
+                <div class="flex gap-2">
+                  <input type="date" id="mNextContactDate" class="input-field flex-1" style="font-size:14px;" />
+                  <button onclick="saveMobileNextContact()"
+                    style="background:#2563eb;color:white;border-radius:8px;padding:8px 14px;font-size:13px;white-space:nowrap;">저장</button>
+                </div>
+              </div>
+
+              <!-- 활동 로그 입력 -->
+              <div class="mobile-card mb-3">
+                <p class="text-xs text-gray-500 mb-2 uppercase tracking-wider">활동 기록</p>
+                <div class="flex gap-2 mb-2 flex-wrap">
+                  <button onclick="setResult('연결됨')"
+                    class="result-btn text-xs px-3 py-2 rounded-lg border border-gray-700 text-gray-400">📞 연결</button>
+                  <button onclick="setResult('부재중')"
+                    class="result-btn text-xs px-3 py-2 rounded-lg border border-gray-700 text-gray-400">📵 부재</button>
+                  <button onclick="setResult('거절')"
+                    class="result-btn text-xs px-3 py-2 rounded-lg border border-gray-700 text-gray-400">❌ 거절</button>
+                  <button onclick="setResult('긍정')"
+                    class="result-btn text-xs px-3 py-2 rounded-lg border border-gray-700 text-gray-400">✅ 긍정</button>
+                  <button onclick="setResult('보류')"
+                    class="result-btn text-xs px-3 py-2 rounded-lg border border-gray-700 text-gray-400">⏸ 보류</button>
+                </div>
+                <textarea id="logNote" class="input-field mb-2" rows="2" placeholder="메모..."></textarea>
+                <button onclick="addLog()" class="w-full py-2.5 rounded-lg text-sm font-medium"
+                  style="background:#2563eb;color:white;">기록 추가</button>
+              </div>
+
+              <!-- 로그 목록 -->
+              <div class="mobile-card">
+                <p class="text-xs text-gray-500 mb-3 uppercase tracking-wider">활동 히스토리</p>
+                <div id="mLogList" class="space-y-3"></div>
+              </div>
+            </div>
+
+            <!-- 모바일 더보기 -->
+            <div id="mobileScreenMore" class="hidden px-4 pt-4 space-y-3">
+              <div class="mobile-card" onclick="showMobileScreen('brands')" style="cursor:pointer;">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div style="background:#1e3a5f;border-radius:10px;padding:8px;"><svg width="18" height="18"
+                        fill="none" viewBox="0 0 24 24" stroke="#3b82f6" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                      </svg></div>
+                    <div>
+                      <p class="font-medium text-sm">브랜드 관리</p>
+                      <p class="text-xs text-gray-500">고객사 브랜드 등록/관리</p>
+                    </div>
+                  </div>
+                  <span class="text-gray-600">›</span>
+                </div>
+              </div>
+              <div class="mobile-card" onclick="showMobileScreen('team')" style="cursor:pointer;">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div style="background:#1a3a1a;border-radius:10px;padding:8px;"><svg width="18" height="18"
+                        fill="none" viewBox="0 0 24 24" stroke="#22c55e" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                      </svg></div>
+                    <div>
+                      <p class="font-medium text-sm">팀 관리</p>
+                      <p class="text-xs text-gray-500">팀원 초대 및 권한 설정</p>
+                    </div>
+                  </div>
+                  <span class="text-gray-600">›</span>
+                </div>
+              </div>
+              <div class="mobile-card" onclick="showMobileScreen('upload')" style="cursor:pointer;">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div style="background:#3a2e1a;border-radius:10px;padding:8px;"><svg width="18" height="18"
+                        fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+                      </svg></div>
+                    <div>
+                      <p class="font-medium text-sm">DB 업로드</p>
+                      <p class="text-xs text-gray-500">엑셀/CSV 리드 일괄 등록</p>
+                    </div>
+                  </div>
+                  <span class="text-gray-600">›</span>
+                </div>
+              </div>
+              <div class="mobile-card" onclick="exportExcel()" style="cursor:pointer;">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div style="background:#1a3a1a;border-radius:10px;padding:8px;"><svg width="18" height="18"
+                        fill="none" viewBox="0 0 24 24" stroke="#22c55e" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                      </svg></div>
+                    <div>
+                      <p class="font-medium text-sm">엑셀 내보내기</p>
+                      <p class="text-xs text-gray-500">현재 리드 데이터 다운로드</p>
+                    </div>
+                  </div>
+                  <span class="text-gray-600">›</span>
+                </div>
+              </div>
+              <div id="deleteAllBtnMobile" class="hidden mobile-card" onclick="deleteSelectedLeads('m')"
+                style="cursor:pointer;border-color:#5a1a1a;">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div style="background:#3a1a1a;border-radius:10px;padding:8px;"><svg width="18" height="18"
+                        fill="none" viewBox="0 0 24 24" stroke="#ef4444" stroke-width="2">
+                        <path
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg></div>
+                    <div>
+                      <p class="font-medium text-sm text-red-400" id="deleteAllBtnMobileText">선택 삭제 (0건)</p>
+                      <p class="text-xs text-red-900">체크된 리드 모두 삭제</p>
+                    </div>
+                  </div>
+                  <span class="text-gray-600">›</span>
+                </div>
+              </div>
+              <div class="mobile-card" onclick="logout()" style="cursor:pointer;border-color:#3a1a1a;">
+                <div class="flex items-center gap-3">
+                  <div style="background:#3a1a1a;border-radius:10px;padding:8px;"><svg width="18" height="18"
+                      fill="none" viewBox="0 0 24 24" stroke="#ef4444" stroke-width="2">
+                      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
+                    </svg></div>
+                  <p class="font-medium text-sm text-red-400">로그아웃</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 모바일 브랜드 관리 -->
+            <div id="mobileScreenBrands" class="hidden px-4 pt-4">
+              <button onclick="showMobileScreen('more')" class="flex items-center gap-2 text-gray-400 text-sm mb-4">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path d="M19 12H5M12 5l-7 7 7 7" />
+                </svg>
+                뒤로
+              </button>
+              <div class="flex items-center justify-between mb-4">
+                <p class="font-medium">브랜드 관리</p>
+                <button onclick="showAddBrand()"
+                  style="background:#2563eb;border-radius:8px;padding:6px 12px;color:white;font-size:12px;">+
+                  추가</button>
+              </div>
+              <div id="mobileBrandList" class="space-y-3"></div>
+            </div>
+
+            <!-- 모바일 팀 관리 -->
+            <div id="mobileScreenTeam" class="hidden px-4 pt-4">
+              <button onclick="showMobileScreen('more')" class="flex items-center gap-2 text-gray-400 text-sm mb-4">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path d="M19 12H5M12 5l-7 7 7 7" />
+                </svg>
+                뒤로
+              </button>
+              <p class="font-medium mb-4">팀 관리</p>
+              <div id="mobileTeamList" class="space-y-2 mb-4"></div>
+              <div class="mobile-card">
+                <p class="text-sm font-medium mb-3">초대 링크 생성</p>
+                <div class="space-y-2 mb-3">
+                  <select id="mInviteRole" class="input-field">
+                    <option value="manager">매니저</option>
+                    <option value="viewer">뷰어</option>
+                    <option value="super_admin">슈퍼어드민</option>
+                  </select>
+                  <select id="mInviteBrandId" class="input-field">
+                    <option value="">브랜드 선택 안함</option>
+                  </select>
+                </div>
+                <button onclick="generateMobileInviteLink()"
+                  style="background:#2563eb;color:white;border-radius:8px;padding:10px;font-size:13px;width:100%;text-align:center;">🔗
+                  링크 생성</button>
+                <div id="mInviteLinkBox" class="hidden mt-3">
+                  <input id="mInviteLinkInput" class="input-field text-xs mb-2" readonly />
+                  <button onclick="copyMobileInviteLink()"
+                    style="background:#1a1a1a;border:1px solid #2a2a2a;color:#9ca3af;border-radius:8px;padding:8px;font-size:12px;width:100%;margin-bottom:8px;">링크
+                    복사</button>
+                  <button onclick="shareMobileKakao()"
+                    style="background:#fee500;color:#3c1e1e;border-radius:8px;padding:10px;font-size:13px;font-weight:600;width:100%;">카카오톡으로
+                    공유</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 모바일 업로드 -->
+            <div id="mobileScreenUpload" class="hidden px-4 pt-4">
+              <button onclick="showMobileScreen('more')" class="flex items-center gap-2 text-gray-400 text-sm mb-4">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path d="M19 12H5M12 5l-7 7 7 7" />
+                </svg>
+                뒤로
+              </button>
+              <div class="flex items-center justify-between mb-2">
+                <p class="font-medium">DB 업로드</p>
+                <button onclick="downloadTemplate()"
+                  class="text-xs text-blue-400 border border-blue-800 px-2 py-1.5 rounded-lg">양식 다운로드</button>
+              </div>
+              <p class="text-xs text-gray-400 mb-3 ml-1">양식의 8개 헤더 항목명이 정확히 일치해야 합니다.</p>
+              <div class="mobile-card mb-3">
+                <p class="text-xs text-gray-500 mb-2">브랜드 선택</p>
+                <select id="mUploadBrandId" class="input-field">
+                  <option value="">선택 안함</option>
+                </select>
+              </div>
+              <div onclick="document.getElementById('mFileInput').click()" class="mobile-card text-center"
+                style="border:2px dashed #374151;cursor:pointer;">
+                <p class="text-2xl mb-2">📂</p>
+                <p class="text-sm text-gray-400">클릭해서 파일 선택</p>
+                <p class="text-xs text-gray-600">.csv, .xlsx 지원</p>
+                <input type="file" id="mFileInput" accept=".csv,.xlsx,.xls" class="hidden"
+                  onchange="handleMobileFile(event)" />
+              </div>
+              <div id="mPreviewSection" class="hidden mt-3">
+                <div class="flex items-center justify-between mb-2">
+                  <p class="text-sm font-medium">미리보기 <span id="mPreviewCount" class="text-gray-500 text-xs"></span></p>
+                  <button onclick="uploadLeads()"
+                    style="background:#2563eb;color:white;border-radius:8px;padding:6px 14px;font-size:12px;">가져오기</button>
+                </div>
+                <div class="mobile-card overflow-auto">
+                  <table class="w-full text-xs">
+                    <thead id="mPreviewHead"></thead>
+                    <tbody id="mPreviewBody"></tbody>
+                  </table>
+                </div>
+              </div>
+              <div id="mUploadResult" class="hidden mt-3 p-3 rounded-lg text-sm"
+                style="background:#1a3a1a;border:1px solid #22c55e;color:#22c55e;"></div>
+            </div>
+
+          </div>
+
+          <!-- 모바일 하단 탭 -->
+          <div id="mobileTab" class="fixed bottom-0 left-0 right-0 z-50"
+            style="background:#080808;border-top:1px solid #1a1a1a;">
+            <div class="flex">
+              <button onclick="showMobileScreen('home')" id="mtab-home"
+                class="flex-1 py-3 flex flex-col items-center gap-1" style="color:#3b82f6;">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="3" width="7" height="7" rx="1" />
+                  <rect x="3" y="14" width="7" height="7" rx="1" />
+                  <rect x="14" y="14" width="7" height="7" rx="1" />
+                </svg>
+                <span class="text-xs font-medium">홈</span>
+              </button>
+              <button onclick="showMobileScreen('leads')" id="mtab-leads"
+                class="flex-1 py-3 flex flex-col items-center gap-1" style="color:#6b7280;">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                </svg>
+                <span class="text-xs">리드</span>
+              </button>
+              <button onclick="showMobileScreen('pipeline')" id="mtab-pipeline"
+                class="flex-1 py-3 flex flex-col items-center gap-1" style="color:#6b7280;">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                </svg>
+                <span class="text-xs">파이프라인</span>
+              </button>
+              <button onclick="showMobileScreen('more')" id="mtab-more"
+                class="flex-1 py-3 flex flex-col items-center gap-1" style="color:#6b7280;">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <circle cx="5" cy="12" r="1" />
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="19" cy="12" r="1" />
+                </svg>
+                <span class="text-xs">더보기</span>
+              </button>
             </div>
           </div>
-          <div id="uploadResult" class="hidden p-3 rounded-lg text-sm" style="background:#1a3a1a;border:1px solid #22c55e;color:#22c55e;"></div>
+
+          <!-- 플로팅 리드 추가 버튼 -->
+          <div id="floatBtn" class="float-btn" onclick="showAddLead()">+</div>
+
         </div>
-      </div>
 
-    </div>
-  </div>
+        <!-- 리드 추가 모달 -->
+        <div id="addLeadModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4"
+          style="background:rgba(0,0,0,0.8);">
+          <div class="w-full max-w-md card p-6 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-medium">리드 추가</h3><button onclick="closeAddLead()"
+                class="text-gray-500 hover:text-white text-xl">✕</button>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div><label class="text-xs text-gray-500 mb-1 block">이름 *</label><input id="addName" class="input-field"
+                  placeholder="홍길동" /></div>
+              <div><label class="text-xs text-gray-500 mb-1 block">연락처</label><input id="addContact" class="input-field"
+                  placeholder="010-0000-0000" /></div>
+              <div><label class="text-xs text-gray-500 mb-1 block">지역</label><input id="addRegion" class="input-field"
+                  placeholder="서울 강남" /></div>
+              <div><label class="text-xs text-gray-500 mb-1 block">채널</label>
+                <select id="addSource" class="input-field">
+                  <option value="">선택</option>
+                  <option>네이버</option>
+                  <option>인스타</option>
+                  <option>직접문의</option>
+                  <option>지인소개</option>
+                  <option>기타</option>
+                </select>
+              </div>
+              <div><label class="text-xs text-gray-500 mb-1 block">예산</label><input id="addBudget" type="number"
+                  class="input-field" placeholder="50000000" /></div>
+              <div><label class="text-xs text-gray-500 mb-1 block">브랜드</label>
+                <select id="addBrand" class="input-field">
+                  <option value="">선택 안함</option>
+                </select>
+              </div>
+              <div class="col-span-2"><label class="text-xs text-gray-500 mb-1 block">단계</label>
+                <select id="addStatus" class="input-field">
+                  <option>신규</option>
+                  <option>상담중</option>
+                  <option>미팅준비</option>
+                  <option>계약검토</option>
+                  <option>완료</option>
+                  <option>보류</option>
+                </select>
+              </div>
+            </div>
+            <button onclick="addLead()" class="btn-primary w-full py-3 text-center text-sm">추가하기</button>
+          </div>
+        </div>
 
-  <!-- 모바일 탭 -->
-  <div id="mobileTab" class="fixed bottom-0 left-0 right-0 border-t z-50" style="background:#080808;border-color:#1a1a1a;">
-    <div class="flex">
-      <button onclick="showScreen('dashboard')" class="flex-1 py-3 flex flex-col items-center gap-1 text-blue-400"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="text-xs">홈</span></button>
-      <button onclick="showScreen('leads')" class="flex-1 py-3 flex flex-col items-center gap-1 text-gray-500"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span class="text-xs">리드</span></button>
-      <button onclick="showScreen('pipeline')" class="flex-1 py-3 flex flex-col items-center gap-1 text-gray-500"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span class="text-xs">파이프라인</span></button>
-      <button onclick="showScreen('team')" class="flex-1 py-3 flex flex-col items-center gap-1 text-gray-500"><svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span class="text-xs">팀</span></button>
-    </div>
-  </div>
-</div>
+        <!-- 브랜드 추가 모달 -->
+        <div id="addBrandModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4"
+          style="background:rgba(0,0,0,0.8);">
+          <div class="w-full max-w-md card p-6 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-medium">브랜드 추가</h3><button onclick="closeAddBrand()"
+                class="text-gray-500 hover:text-white text-xl">✕</button>
+            </div>
+            <div class="space-y-3">
+              <div><label class="text-xs text-gray-500 mb-1 block">브랜드명 *</label><input id="brandName"
+                  class="input-field" placeholder="예: 와요커피" /></div>
+              <div><label class="text-xs text-gray-500 mb-1 block">설명</label><input id="brandDesc" class="input-field"
+                  placeholder="예: 커피 프랜차이즈" /></div>
+              <div><label class="text-xs text-gray-500 mb-1 block">브랜드 색상</label><input id="brandColor" type="color"
+                  value="#3b82f6" class="w-full h-10 rounded-lg cursor-pointer"
+                  style="background:#1a1a1a;border:1px solid #2a2a2a;" /></div>
+            </div>
+            <button onclick="addBrand()" class="btn-primary w-full py-2.5 text-center">추가하기</button>
+          </div>
+        </div>
 
-<!-- 리드 추가 모달 -->
-<div id="addLeadModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4" style="background:rgba(0,0,0,0.8);">
-  <div class="w-full max-w-md card p-6 space-y-4">
-    <div class="flex items-center justify-between"><h3 class="font-medium">리드 추가</h3><button onclick="closeAddLead()" class="text-gray-500 hover:text-white">✕</button></div>
-    <div class="grid grid-cols-2 gap-3">
-      <div><label class="text-xs text-gray-500 mb-1 block">이름 *</label><input id="addName" class="input-field" placeholder="홍길동" /></div>
-      <div><label class="text-xs text-gray-500 mb-1 block">연락처</label><input id="addContact" class="input-field" placeholder="010-0000-0000" /></div>
-      <div><label class="text-xs text-gray-500 mb-1 block">지역</label><input id="addRegion" class="input-field" placeholder="서울 강남" /></div>
-      <div><label class="text-xs text-gray-500 mb-1 block">채널</label>
-        <select id="addSource" class="input-field"><option value="">선택</option><option>네이버</option><option>인스타</option><option>직접문의</option><option>지인소개</option><option>기타</option></select>
-      </div>
-      <div><label class="text-xs text-gray-500 mb-1 block">예산</label><input id="addBudget" type="number" class="input-field" placeholder="50000000" /></div>
-      <div><label class="text-xs text-gray-500 mb-1 block">브랜드</label>
-        <select id="addBrand" class="input-field"><option value="">선택 안함</option></select>
-      </div>
-      <div class="col-span-2"><label class="text-xs text-gray-500 mb-1 block">단계</label>
-        <select id="addStatus" class="input-field"><option>신규</option><option>상담중</option><option>미팅준비</option><option>계약검토</option><option>완료</option><option>보류</option></select>
-      </div>
-    </div>
-    <button onclick="addLead()" class="btn-primary w-full py-2.5 text-center">추가하기</button>
-  </div>
-</div>
+        <script>
+          const SUPABASE_URL = 'https://yowpwrziyxuljhsewlrm.supabase.co'
+          const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlvd3B3cnppeXh1bGpoc2V3bHJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNzU4MzYsImV4cCI6MjA5MDk1MTgzNn0.rpqjEV5ygfbcEq2JcyLvO7mwlycy2lLeNw-NkEsUhMA'
+          const { createClient } = supabase
+          const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-<!-- 브랜드 추가 모달 -->
-<div id="addBrandModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4" style="background:rgba(0,0,0,0.8);">
-  <div class="w-full max-w-md card p-6 space-y-4">
-    <div class="flex items-center justify-between"><h3 class="font-medium">브랜드 추가</h3><button onclick="closeAddBrand()" class="text-gray-500 hover:text-white">✕</button></div>
-    <div class="space-y-3">
-      <div><label class="text-xs text-gray-500 mb-1 block">브랜드명 *</label><input id="brandName" class="input-field" placeholder="예: 와요커피" /></div>
-      <div><label class="text-xs text-gray-500 mb-1 block">설명</label><input id="brandDesc" class="input-field" placeholder="예: 커피 프랜차이즈" /></div>
-      <div><label class="text-xs text-gray-500 mb-1 block">브랜드 색상</label><input id="brandColor" type="color" value="#3b82f6" class="w-full h-10 rounded-lg cursor-pointer" style="background:#1a1a1a;border:1px solid #2a2a2a;" /></div>
-    </div>
-    <button onclick="addBrand()" class="btn-primary w-full py-2.5 text-center">추가하기</button>
-  </div>
-</div>
+          let allLeads = [], allBrands = [], allUsers = []
+          let currentLead = null, selectedResult = '', dragLeadId = null
+          let currentBrandId = null, currentUser = null, pendingInviteLink = null
 
-<script>
-  const SUPABASE_URL = 'https://yowpwrziyxuljhsewlrm.supabase.co'
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlvd3B3cnppeXh1bGpoc2V3bHJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNzU4MzYsImV4cCI6MjA5MDk1MTgzNn0.rpqjEV5ygfbcEq2JcyLvO7mwlycy2lLeNw-NkEsUhMA'
-  const { createClient } = supabase
-  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+          const statusColors = {
+            '신규': '#1e3a5f|#3b82f6', '상담중': '#3a2e1a|#f59e0b',
+            '미팅준비': '#3a1a1a|#f97316', '계약검토': '#2a1a3a|#a855f7',
+            '완료': '#1a3a1a|#22c55e', '보류': '#1f1f1f|#6b7280'
+          }
 
-  let allLeads = [], allBrands = [], allUsers = []
-  let currentLead = null, selectedResult = '', dragLeadId = null
-  let currentBrandId = null, currentUser = null
-  let pendingInviteLink = null
+          function getBadge(status) {
+            const [bg, color] = (statusColors[status] || '#1f1f1f|#6b7280').split('|')
+            return `<span class="badge" style="background:${bg};color:${color}">${status}</span>`
+          }
 
-  const statusColors = {
-    '신규': '#1e3a5f|#3b82f6', '상담중': '#3a2e1a|#f59e0b',
-    '미팅준비': '#3a1a1a|#f97316', '계약검토': '#2a1a3a|#a855f7',
-    '완료': '#1a3a1a|#22c55e', '보류': '#1f1f1f|#6b7280'
-  }
+          function isMobile() { return window.innerWidth <= 768 }
 
-  function getBadge(status) {
-    const [bg, color] = (statusColors[status] || '#1f1f1f|#6b7280').split('|')
-    return `<span class="badge" style="background:${bg};color:${color}">${status}</span>`
-  }
+          // ===== 초대 =====
+          function checkInviteToken() {
+            const params = new URLSearchParams(window.location.search)
+            const token = params.get('invite')
+            if (!token) return false
+            try {
+              const invite = JSON.parse(atob(token))
+              if (Date.now() > invite.expires) { alert('초대 링크가 만료됐어요.'); return false }
+              pendingInviteLink = invite
+              document.getElementById('loginScreen').classList.add('hidden')
+              document.getElementById('inviteScreen').classList.remove('hidden')
+              return true
+            } catch { return false }
+          }
 
-  // ===== 초대 링크 처리 =====
-  function checkInviteToken() {
-    const params = new URLSearchParams(window.location.search)
-    const token = params.get('invite')
-    if (!token) return false
-    const decoded = atob(token)
-    const invite = JSON.parse(decoded)
-    if (Date.now() > invite.expires) {
-      alert('초대 링크가 만료됐어요.')
-      return false
-    }
-    pendingInviteLink = invite
-    document.getElementById('loginScreen').classList.add('hidden')
-    document.getElementById('inviteScreen').classList.remove('hidden')
-    return true
-  }
+          async function completeInvite() {
+            const name = document.getElementById('inviteName').value
+            const password = document.getElementById('invitePassword').value
+            const errEl = document.getElementById('inviteError')
+            if (!name || password.length < 8) { errEl.textContent = '이름과 8자 이상 비밀번호를 입력해주세요'; errEl.classList.remove('hidden'); return }
+            const email = `invite_${Date.now()}@jungchongmoo.com`
+            const { data, error } = await sb.auth.signUp({ email, password })
+            if (error) { errEl.textContent = error.message; errEl.classList.remove('hidden'); return }
+            await sb.from('users').insert({ id: data.user.id, role: pendingInviteLink.role, name, email, company_id: pendingInviteLink.brandId || null })
+            alert('가입 완료! 로그인해주세요.')
+            window.location.href = window.location.pathname
+          }
 
-  async function completeInvite() {
-    const name = document.getElementById('inviteName').value
-    const password = document.getElementById('invitePassword').value
-    const errEl = document.getElementById('inviteError')
-    if (!name || password.length < 8) {
-      errEl.textContent = '이름과 8자 이상 비밀번호를 입력해주세요'
-      errEl.classList.remove('hidden')
-      return
-    }
-    const email = pendingInviteLink.email || `${Date.now()}@invite.jungchongmoo.com`
-    const { data, error } = await sb.auth.signUp({ email, password })
-    if (error) { errEl.textContent = error.message; errEl.classList.remove('hidden'); return }
-    await sb.from('users').insert({
-      id: data.user.id,
-      role: pendingInviteLink.role,
-      name,
-      email,
-      company_id: pendingInviteLink.brandId || null
-    })
-    alert('가입이 완료됐어요! 로그인해주세요.')
-    window.location.href = window.location.pathname
-  }
+          // ===== 인증 =====
+          async function login() {
+            const email = document.getElementById('email').value
+            const password = document.getElementById('password').value
+            const { data, error } = await sb.auth.signInWithPassword({ email, password })
+            if (error) { document.getElementById('errorMsg').classList.remove('hidden'); return }
+            initApp(data.user)
+          }
 
-  // ===== 인증 =====
-  async function login() {
-    const email = document.getElementById('email').value
-    const password = document.getElementById('password').value
-    const { data, error } = await sb.auth.signInWithPassword({ email, password })
-    if (error) { document.getElementById('errorMsg').classList.remove('hidden'); return }
-    initApp(data.user)
-  }
+          async function logout() {
+            await sb.auth.signOut()
+            document.getElementById('app').classList.add('hidden')
+            document.getElementById('loginScreen').classList.remove('hidden')
+          }
 
-  async function logout() {
-    await sb.auth.signOut()
-    document.getElementById('app').classList.add('hidden')
-    document.getElementById('loginScreen').classList.remove('hidden')
-  }
+          async function initApp(user) {
+            currentUser = user
+            document.getElementById('loginScreen').classList.add('hidden')
+            document.getElementById('inviteScreen').classList.add('hidden')
+            document.getElementById('app').classList.remove('hidden')
+            if (document.getElementById('sidebarEmail')) document.getElementById('sidebarEmail').textContent = user.email
+            await loadBrands()
+            await loadLeads()
+            await loadTeam()
+            if (isMobile()) showMobileScreen('home')
+            else showScreen('dashboard')
+          }
 
-  async function initApp(user) {
-    currentUser = user
-    document.getElementById('loginScreen').classList.add('hidden')
-    document.getElementById('inviteScreen').classList.add('hidden')
-    document.getElementById('app').classList.remove('hidden')
-    document.getElementById('sidebarEmail').textContent = user.email
-    await loadBrands()
-    await loadLeads()
-    await loadTeam()
-    showScreen('dashboard')
-  }
+          // ===== 브랜드 =====
+          async function loadBrands() {
+            const { data } = await sb.from('brands').select('*').order('name')
+            allBrands = data || []
+            const opts = allBrands.map(b => `<option value="${b.id}">${b.name}</option>`).join('')
+            const noOpt = '<option value="">선택 안함</option>'
+            const allOpt = '<option value="">전체 브랜드</option>'
+            if (document.getElementById('brandSelect')) document.getElementById('brandSelect').innerHTML = allOpt + opts
+            if (document.getElementById('inviteBrandId')) document.getElementById('inviteBrandId').innerHTML = noOpt + opts
+            if (document.getElementById('uploadBrandId')) document.getElementById('uploadBrandId').innerHTML = noOpt + opts
+            if (document.getElementById('addBrand')) document.getElementById('addBrand').innerHTML = noOpt + opts
+            if (document.getElementById('mInviteBrandId')) document.getElementById('mInviteBrandId').innerHTML = noOpt + opts
+            if (document.getElementById('mUploadBrandId')) document.getElementById('mUploadBrandId').innerHTML = noOpt + opts
+          }
 
-  // ===== 브랜드 =====
-  async function loadBrands() {
-    const { data } = await sb.from('brands').select('*').order('name')
-    allBrands = data || []
-    const opts = '<option value="">전체 브랜드</option>' + allBrands.map(b => `<option value="${b.id}">${b.name}</option>`).join('')
-    document.getElementById('brandSelect').innerHTML = opts
-    document.getElementById('inviteBrandId').innerHTML = '<option value="">선택 안함</option>' + allBrands.map(b => `<option value="${b.id}">${b.name}</option>`).join('')
-    document.getElementById('uploadBrandId').innerHTML = '<option value="">선택 안함</option>' + allBrands.map(b => `<option value="${b.id}">${b.name}</option>`).join('')
-    document.getElementById('addBrand').innerHTML = '<option value="">선택 안함</option>' + allBrands.map(b => `<option value="${b.id}">${b.name}</option>`).join('')
-  }
+          async function changeBrand(brandId) { currentBrandId = brandId || null; await loadLeads() }
 
-  async function changeBrand(brandId) {
-    currentBrandId = brandId || null
-    await loadLeads()
-  }
-
-  function renderBrandList() {
-    document.getElementById('brandList').innerHTML = allBrands.map(b => `
-      <div class="card p-5">
+          function renderBrandList() {
+            const html = allBrands.map(b => {
+              const bLeads = allLeads.filter(l => l.brand_id === b.id)
+              const cnt = bLeads.length
+              const done = bLeads.filter(l => l.status === '완료').length
+              return `<div class="card p-4">
         <div class="flex items-center gap-3 mb-3">
-          <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm" style="background:${b.color}">${b.name[0]}</div>
-          <div><p class="font-medium text-sm">${b.name}</p><p class="text-xs text-gray-500">${b.description||'-'}</p></div>
+          <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm" style="background:${b.color}">${b.name[0]}</div>
+          <div><p class="font-medium text-sm">${b.name}</p><p class="text-xs text-gray-500">${b.description || '-'}</p></div>
         </div>
         <div class="flex items-center justify-between pt-3" style="border-top:1px solid #1f1f1f">
-          <span class="text-xs text-gray-600">${allLeads.filter(l=>l.brand_id===b.id).length}건 리드</span>
+          <span class="text-xs text-gray-600">리드 ${cnt}건 · 완료 ${done}건</span>
           <div class="flex gap-2">
-            <button onclick="changeBrand('${b.id}');showScreen('leads')" class="text-xs text-blue-400">리드 보기</button>
+            <button onclick="changeBrand('${b.id}');${isMobile() ? 'showMobileScreen(\'leads\')' : 'showScreen(\'leads\')'}" class="text-xs text-blue-400">리드 보기</button>
             <button onclick="deleteBrand('${b.id}')" class="text-xs text-red-400">삭제</button>
           </div>
         </div>
-      </div>`).join('') || '<p class="text-xs text-gray-600">브랜드가 없습니다</p>'
-  }
+      </div>`
+            }).join('') || '<p class="text-xs text-gray-600 text-center py-4">브랜드가 없습니다</p>'
+            if (document.getElementById('brandList')) document.getElementById('brandList').innerHTML = html
+            if (document.getElementById('mobileBrandList')) document.getElementById('mobileBrandList').innerHTML = html
+          }
 
-  function showAddBrand() { document.getElementById('addBrandModal').classList.remove('hidden') }
-  function closeAddBrand() { document.getElementById('addBrandModal').classList.add('hidden') }
+          function showAddBrand() { document.getElementById('addBrandModal').classList.remove('hidden') }
+          function closeAddBrand() { document.getElementById('addBrandModal').classList.add('hidden') }
 
-  async function addBrand() {
-    const name = document.getElementById('brandName').value
-    if (!name) return alert('브랜드명을 입력해주세요')
-    await sb.from('brands').insert({ name, description: document.getElementById('brandDesc').value, color: document.getElementById('brandColor').value })
-    closeAddBrand()
-    document.getElementById('brandName').value = ''
-    document.getElementById('brandDesc').value = ''
-    await loadBrands()
-    renderBrandList()
-  }
+          async function addBrand() {
+            const name = document.getElementById('brandName').value
+            if (!name) return alert('브랜드명을 입력해주세요')
+            await sb.from('brands').insert({ name, description: document.getElementById('brandDesc').value, color: document.getElementById('brandColor').value })
+            closeAddBrand()
+            document.getElementById('brandName').value = ''
+            document.getElementById('brandDesc').value = ''
+            await loadBrands(); renderBrandList()
+          }
 
-  async function deleteBrand(id) {
-    if (!confirm('정말 삭제할까요?')) return
-    await sb.from('brands').delete().eq('id', id)
-    await loadBrands()
-    renderBrandList()
-  }
+          async function deleteBrand(id) {
+            if (!confirm('정말 삭제할까요?')) return
+            await sb.from('brands').delete().eq('id', id)
+            await loadBrands(); renderBrandList()
+          }
 
-  // ===== 팀 관리 + 초대 =====
-  async function loadTeam() {
-    const { data } = await sb.from('users').select('*').order('created_at')
-    allUsers = data || []
-    renderTeamList()
-  }
+          // ===== 팀 =====
+          async function loadTeam() {
+            const { data } = await sb.from('users').select('*').order('created_at')
+            allUsers = data || []
+            renderTeamList()
+          }
 
-  function renderTeamList() {
-    const roleLabels = { super_admin: '슈퍼어드민', manager: '매니저', viewer: '뷰어' }
-    const roleColors = { super_admin: '#1e3a5f|#3b82f6', manager: '#1a3a1a|#22c55e', viewer: '#3a2e1a|#f59e0b' }
-    document.getElementById('teamList').innerHTML = allUsers.length
-      ? allUsers.map(u => {
-          const [bg, color] = (roleColors[u.role] || '#1f1f1f|#6b7280').split('|')
-          const brand = allBrands.find(b => b.id === u.company_id)
-          return `<div class="flex items-center justify-between p-3 rounded-lg" style="background:#0d0d0d;border:1px solid #1f1f1f;">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-blue-900 flex items-center justify-center text-xs font-bold text-blue-300">${(u.name||'?')[0]}</div>
+          function renderTeamList() {
+            const roleLabels = { super_admin: '슈퍼어드민', manager: '매니저', viewer: '뷰어' }
+            const roleColors = { super_admin: '#1e3a5f|#3b82f6', manager: '#1a3a1a|#22c55e', viewer: '#3a2e1a|#f59e0b' }
+            const html = allUsers.length ? allUsers.map(u => {
+              const [bg, color] = (roleColors[u.role] || '#1f1f1f|#6b7280').split('|')
+              const brand = allBrands.find(b => b.id === u.company_id)
+              return `<div class="flex items-center justify-between p-3 rounded-lg" style="background:#0d0d0d;border:1px solid #1f1f1f;">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-blue-900 flex items-center justify-center text-xs font-bold text-blue-300">${(u.name || '?')[0]}</div>
+          <div><p class="text-sm font-medium">${u.name || '-'}</p><p class="text-xs text-gray-500">${brand ? brand.name : '전체'}</p></div>
+        </div>
+        <span class="badge" style="background:${bg};color:${color}">${roleLabels[u.role] || u.role}</span>
+      </div>`
+            }).join('') : '<p class="text-xs text-gray-600 text-center py-4">팀원이 없습니다</p>'
+            if (document.getElementById('teamList')) document.getElementById('teamList').innerHTML = html
+            if (document.getElementById('mobileTeamList')) document.getElementById('mobileTeamList').innerHTML = html
+          }
+
+          function generateInviteLink() {
+            const role = document.getElementById('inviteRole').value
+            const brandId = document.getElementById('inviteBrandId').value
+            const token = btoa(JSON.stringify({ role, brandId, expires: Date.now() + 24 * 60 * 60 * 1000 }))
+            const link = `${window.location.origin}${window.location.pathname}?invite=${token}`
+            document.getElementById('inviteLinkInput').value = link
+            document.getElementById('inviteLinkBox').classList.remove('hidden')
+          }
+
+          function generateMobileInviteLink() {
+            const role = document.getElementById('mInviteRole').value
+            const brandId = document.getElementById('mInviteBrandId').value
+            const token = btoa(JSON.stringify({ role, brandId, expires: Date.now() + 24 * 60 * 60 * 1000 }))
+            const link = `${window.location.origin}${window.location.pathname}?invite=${token}`
+            document.getElementById('mInviteLinkInput').value = link
+            document.getElementById('mInviteLinkBox').classList.remove('hidden')
+          }
+
+          function copyInviteLink() { navigator.clipboard.writeText(document.getElementById('inviteLinkInput').value); alert('복사됐어요!') }
+          function copyMobileInviteLink() { navigator.clipboard.writeText(document.getElementById('mInviteLinkInput').value); alert('복사됐어요!') }
+
+          function shareKakao() {
+            const link = document.getElementById('inviteLinkInput').value
+            const msg = `정총무 CRM에 초대합니다!\n${link}`
+            if (navigator.share) navigator.share({ title: '정총무 CRM 초대', text: msg, url: link })
+            else { navigator.clipboard.writeText(msg); alert('초대 메시지가 복사됐어요! 카카오톡에 붙여넣기 해주세요.') }
+          }
+
+          function shareMobileKakao() {
+            const link = document.getElementById('mInviteLinkInput').value
+            const msg = `정총무 CRM에 초대합니다!\n${link}`
+            if (navigator.share) navigator.share({ title: '정총무 CRM 초대', text: msg, url: link })
+            else { navigator.clipboard.writeText(msg); alert('초대 메시지 복사됐어요!') }
+          }
+
+          // ===== 리드 =====
+          async function loadLeads() {
+            let query = sb.from('leads').select('*').order('created_at', { ascending: false })
+            if (currentBrandId) query = query.eq('brand_id', currentBrandId)
+            const { data } = await query
+            allLeads = data || []
+            renderDashboard()
+            renderLeadsTable(allLeads)
+            renderPipeline()
+            renderBrandList()
+            renderMobileHome()
+            renderMobileLeads(allLeads)
+          }
+
+          function renderDashboard() {
+            const now = new Date()
+            const total = allLeads.length
+            const newThisMonth = allLeads.filter(l => { const d = new Date(l.created_at); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() }).length
+            const done = allLeads.filter(l => l.status === '완료').length
+            const overdue = allLeads.filter(l => l.next_contact_at && new Date(l.next_contact_at) < now && l.status !== '완료').length
+            const targetContract = Math.max(1, Math.round(total * 0.05))
+            const currentRate = total > 0 ? ((done / total) * 100).toFixed(1) : 0
+            const achieveRate = Math.min(100, Math.round((done / targetContract) * 100))
+
+            if (document.getElementById('kpiNew')) {
+              document.getElementById('kpiNew').textContent = newThisMonth
+              document.getElementById('kpiTotal').textContent = total
+              document.getElementById('kpiDone').textContent = done
+              document.getElementById('kpiOverdue').textContent = overdue
+              document.getElementById('targetContract').textContent = targetContract + '건'
+              document.getElementById('currentRate').textContent = currentRate + '%'
+              document.getElementById('contractAchieve').textContent = achieveRate + '%'
+              document.getElementById('contractProgress').style.width = achieveRate + '%'
+
+              const rateEl = document.getElementById('rateStatus')
+              if (currentRate >= 5) { rateEl.textContent = '🎯 목표 달성!'; rateEl.style.cssText = 'background:#1a3a1a;color:#22c55e;padding:4px 12px;border-radius:20px;' }
+              else if (currentRate >= 3) { rateEl.textContent = '📈 순항중'; rateEl.style.cssText = 'background:#3a2e1a;color:#f59e0b;padding:4px 12px;border-radius:20px;' }
+              else { rateEl.textContent = '💪 분발 필요'; rateEl.style.cssText = 'background:#3a1a1a;color:#ef4444;padding:4px 12px;border-radius:20px;' }
+            }
+
+            const stages = ['신규', '상담중', '미팅준비', '계약검토', '완료', '보류']
+            const max = Math.max(...stages.map(s => allLeads.filter(l => l.status === s).length), 1)
+
+            if (document.getElementById('stageChart')) {
+              document.getElementById('stageChart').innerHTML = stages.map(s => {
+                const cnt = allLeads.filter(l => l.status === s).length; const pct = Math.round((cnt / max) * 100)
+                const [, color] = (statusColors[s] || '#1f1f1f|#6b7280').split('|')
+                return `<div><div class="flex justify-between text-xs mb-1"><span class="text-gray-400">${s}</span><span class="text-gray-500">${cnt}</span></div><div class="h-1.5 rounded-full" style="background:#1a1a1a"><div class="h-1.5 rounded-full" style="width:${pct}%;background:${color}"></div></div></div>`
+              }).join('')
+            }
+
+            if (document.getElementById('funnelChart')) {
+              const funnelStages = [
+                { label: '전체', key: null, color: '#3b82f6' }, { label: '상담', key: ['상담중', '미팅준비', '계약검토', '완료'], color: '#f59e0b' },
+                { label: '미팅', key: ['미팅준비', '계약검토', '완료'], color: '#f97316' }, { label: '검토', key: ['계약검토', '완료'], color: '#a855f7' },
+                { label: '완료', key: ['완료'], color: '#22c55e' }
+              ]
+              document.getElementById('funnelChart').innerHTML = funnelStages.map((f, i) => {
+                const cnt = f.key ? allLeads.filter(l => f.key.includes(l.status)).length : total
+                const pct = total > 0 ? Math.round((cnt / total) * 100) : 0
+                return `<div><div class="flex justify-between text-xs mb-1"><span class="text-gray-400">${f.label}</span><span class="text-gray-500">${cnt}건${i > 0 ? ' (' + pct + '%)' : ''}</span></div><div class="h-2 rounded-full" style="background:#1a1a1a"><div class="h-2 rounded-full" style="width:${i === 0 ? 100 : pct}%;background:${f.color}"></div></div></div>`
+              }).join('')
+            }
+
+            if (document.getElementById('sourceChart')) {
+              const sources = {}; allLeads.forEach(l => { const s = l.source || '미분류'; sources[s] = (sources[s] || 0) + 1 })
+              const sortedSources = Object.entries(sources).sort((a, b) => b[1] - a[1]); const maxSource = sortedSources[0]?.[1] || 1
+              document.getElementById('sourceChart').innerHTML = sortedSources.length
+                ? sortedSources.map(([src, cnt]) => `<div><div class="flex justify-between text-xs mb-1"><span class="text-gray-400">${src}</span><span class="text-gray-500">${cnt}건</span></div><div class="h-1.5 rounded-full" style="background:#1a1a1a"><div class="h-1.5 rounded-full bg-blue-500" style="width:${Math.round((cnt / maxSource) * 100)}%"></div></div></div>`).join('')
+                : '<p class="text-xs text-gray-600">데이터 없음</p>'
+            }
+
+            if (document.getElementById('overdueList')) {
+              const overdueLeads = allLeads.filter(l => l.next_contact_at && new Date(l.next_contact_at) < now && l.status !== '완료').slice(0, 5)
+              document.getElementById('overdueCount').textContent = overdueLeads.length + '건'
+              document.getElementById('overdueList').innerHTML = overdueLeads.length
+                ? overdueLeads.map(l => { const days = Math.floor((now - new Date(l.next_contact_at)) / (1000 * 60 * 60 * 24)); return `<div onclick="openDetail('${l.id}')" class="p-2.5 rounded-lg cursor-pointer hover:bg-gray-900 transition" style="border:1px solid #2a1a1a;"><div class="flex items-center justify-between"><span class="text-xs font-medium">${l.name || '-'}</span><span class="text-xs text-red-400">${days}일 경과</span></div><p class="text-xs text-gray-600 mt-0.5">${l.contact || '-'}</p></div>` }).join('')
+                : '<p class="text-xs text-gray-600 text-center py-4">재접촉 대기 없음 👍</p>'
+            }
+
+            if (document.getElementById('recentLeads')) {
+              document.getElementById('recentLeads').innerHTML = allLeads.slice(0, 5).map(l => `
+        <div class="lead-row flex items-center gap-4 px-3 py-2.5 rounded-lg" onclick="openDetail('${l.id}')" style="border-bottom:1px solid #111">
+          <span class="font-medium text-sm w-24 truncate">${l.name || '-'}</span>
+          <span class="text-xs text-gray-500 w-28 truncate">${l.contact || '-'}</span>
+          <span class="text-xs text-gray-500 w-20 truncate">${l.region || '-'}</span>
+          <span class="text-xs text-gray-500 flex-1">${l.source || '-'}</span>
+          ${getBadge(l.status)}
+        </div>`).join('') || '<p class="text-xs text-gray-600 py-4 text-center">리드가 없습니다</p>'
+            }
+
+            renderBrandDashboard()
+          }
+
+          function renderBrandDashboard() {
+            const container = document.getElementById('brandDashboard')
+            if (!container) return
+            const now = new Date()
+            container.innerHTML = allBrands.map(b => {
+              const bLeads = allLeads.filter(l => l.brand_id === b.id)
+              const total = bLeads.length
+              const done = bLeads.filter(l => l.status === '완료').length
+              const inProgress = bLeads.filter(l => ['상담중', '미팅준비', '계약검토'].includes(l.status)).length
+              const rejected = bLeads.filter(l => l.status === '보류').length
+              const newLeads = bLeads.filter(l => l.status === '신규').length
+              const rate = total > 0 ? ((done / total) * 100).toFixed(1) : 0
+              const overdue = bLeads.filter(l => l.next_contact_at && new Date(l.next_contact_at) < now && l.status !== '완료').length
+              const achieveRate = Math.min(100, Math.round((rate / 5) * 100))
+
+              let statusIcon = '✅', statusColor = '#22c55e', statusText = '정상'
+              if (overdue > 0) { statusIcon = '⚠️'; statusColor = '#f59e0b'; statusText = `재접촉 ${overdue}건` }
+              if (rejected >= total * 0.3 && total > 0) { statusIcon = '🔴'; statusColor = '#ef4444'; statusText = '주의 필요' }
+              if (total === 0) { statusIcon = '⬜'; statusColor = '#6b7280'; statusText = '리드 없음' }
+
+              return `<div class="card p-5 cursor-pointer hover:border-gray-600 transition" onclick="changeBrand('${b.id}');showScreen('leads')">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold" style="background:${b.color}">${b.name[0]}</div>
+            <div><p class="font-medium text-sm">${b.name}</p><p class="text-xs" style="color:${statusColor}">${statusIcon} ${statusText}</p></div>
+          </div>
+          <span class="text-xs text-gray-600">→</span>
+        </div>
+        <div class="grid grid-cols-4 gap-2 mb-3">
+          <div class="text-center p-2 rounded-lg" style="background:#0d0d0d"><p class="text-lg font-bold">${total}</p><p class="text-xs text-gray-500">전체</p></div>
+          <div class="text-center p-2 rounded-lg" style="background:#0d0d0d"><p class="text-lg font-bold text-blue-400">${inProgress}</p><p class="text-xs text-gray-500">진행</p></div>
+          <div class="text-center p-2 rounded-lg" style="background:#0d0d0d"><p class="text-lg font-bold text-green-400">${done}</p><p class="text-xs text-gray-500">완료</p></div>
+          <div class="text-center p-2 rounded-lg" style="background:#0d0d0d"><p class="text-lg font-bold text-gray-400">${rejected}</p><p class="text-xs text-gray-500">보류</p></div>
+        </div>
+        <div>
+          <div class="flex justify-between text-xs mb-1"><span class="text-gray-500">전환율</span><span style="color:${rate >= 5 ? '#22c55e' : rate >= 3 ? '#f59e0b' : '#ef4444'}">${rate}% / 목표 5%</span></div>
+          <div class="h-1.5 rounded-full" style="background:#1a1a1a"><div class="h-1.5 rounded-full" style="width:${achieveRate}%;background:${rate >= 5 ? '#22c55e' : rate >= 3 ? '#f59e0b' : '#ef4444'}"></div></div>
+        </div>
+        ${newLeads > 0 ? `<p class="text-xs text-blue-400 mt-2">🆕 신규 ${newLeads}건 대기</p>` : ''}
+        ${overdue > 0 ? `<p class="text-xs text-yellow-400 mt-1">⏰ 재접촉 ${overdue}건 지연</p>` : ''}
+      </div>`
+            }).join('') || '<p class="text-xs text-gray-600 col-span-3 text-center py-4">등록된 브랜드가 없습니다</p>'
+          }
+
+          // ===== 모바일 렌더 =====
+          function renderMobileHome() {
+            const now = new Date()
+            const total = allLeads.length
+            const done = allLeads.filter(l => l.status === '완료').length
+            const newThisMonth = allLeads.filter(l => { const d = new Date(l.created_at); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear() }).length
+            const overdue = allLeads.filter(l => l.next_contact_at && new Date(l.next_contact_at) < now && l.status !== '완료').length
+            const targetContract = Math.max(1, Math.round(total * 0.05))
+            const achieveRate = Math.min(100, Math.round((done / targetContract) * 100))
+
+            if (document.getElementById('mKpiTotal')) document.getElementById('mKpiTotal').textContent = total
+            if (document.getElementById('mKpiNew')) document.getElementById('mKpiNew').textContent = newThisMonth
+            if (document.getElementById('mKpiDone')) document.getElementById('mKpiDone').textContent = done
+            if (document.getElementById('mKpiOverdue')) document.getElementById('mKpiOverdue').textContent = overdue
+            if (document.getElementById('mAchieve')) document.getElementById('mAchieve').textContent = achieveRate + '%'
+
+            // 긴급 배너
+            const urgentBanner = document.getElementById('mobileUrgentBanner')
+            if (overdue > 0 && urgentBanner) {
+              urgentBanner.classList.remove('hidden')
+              document.getElementById('mobileUrgentText').textContent = `${overdue}명에게 연락이 필요해요`
+            }
+
+            // 단계별 차트
+            const stages = ['신규', '상담중', '미팅준비', '계약검토', '완료', '보류']
+            const max = Math.max(...stages.map(s => allLeads.filter(l => l.status === s).length), 1)
+            if (document.getElementById('mStageChart')) {
+              document.getElementById('mStageChart').innerHTML = stages.map(s => {
+                const cnt = allLeads.filter(l => l.status === s).length; const pct = Math.round((cnt / max) * 100)
+                const [, color] = (statusColors[s] || '#1f1f1f|#6b7280').split('|')
+                return `<div><div class="flex justify-between text-xs mb-1"><span class="text-gray-400">${s}</span><span style="color:${color};font-weight:500;">${cnt}건</span></div><div class="h-2 rounded-full" style="background:#1a1a1a"><div class="h-2 rounded-full" style="width:${pct}%;background:${color}"></div></div></div>`
+              }).join('')
+            }
+
+            // 오늘 재접촉 대기
+            const todayList = allLeads.filter(l => l.next_contact_at && new Date(l.next_contact_at) < now && l.status !== '완료').slice(0, 5)
+            if (document.getElementById('mTodayList')) {
+              document.getElementById('mTodayList').innerHTML = todayList.length
+                ? todayList.map(l => {
+                  const days = Math.floor((now - new Date(l.next_contact_at)) / (1000 * 60 * 60 * 24))
+                  return `<div onclick="openMobileDetail('${l.id}')" style="background:#0d0d0d;border:1px solid #2a1a1a;border-radius:10px;padding:10px;display:flex;align-items:center;justify-content:space-between;">
               <div>
-                <p class="text-sm font-medium">${u.name||'-'}</p>
-                <p class="text-xs text-gray-500">${u.email||''} ${brand?'· '+brand.name:''}</p>
+                <p style="font-size:13px;font-weight:600;">${l.name || '-'}</p>
+                <p style="font-size:11px;color:#9ca3af;">${l.contact || '-'}</p>
+              </div>
+              <div style="text-align:right;">
+                <p style="font-size:11px;color:#ef4444;">${days}일 경과</p>
+                <a href="tel:${l.contact}" style="font-size:11px;color:#22c55e;" onclick="event.stopPropagation()">📞 전화</a>
+              </div>
+            </div>`
+                }).join('')
+                : '<p style="font-size:12px;color:#6b7280;text-align:center;padding:12px;">오늘 재접촉 대기 없음 👍</p>'
+            }
+          }
+
+          function renderMobileLeads(leads) {
+            if (!document.getElementById('mobileLeadsList')) return
+
+            let showCheckbox = false;
+            if (currentUser) {
+              const myUser = allUsers.find(u => u.id === currentUser.id);
+              if (myUser && (myUser.role === 'super_admin' || myUser.role === 'manager')) showCheckbox = true;
+            }
+
+            document.getElementById('mobileLeadsList').innerHTML = leads.length
+              ? leads.map(l => {
+                const [bg, color] = (statusColors[l.status] || '#1f1f1f|#6b7280').split('|')
+                const brand = allBrands.find(b => b.id === l.brand_id)
+                return `<div style="background:#111;border:1px solid #1f1f1f;border-radius:14px;padding:14px;position:relative;" onclick="openMobileDetail('${l.id}')">
+            ${showCheckbox ? `<div style="position:absolute;top:14px;right:14px;" onclick="event.stopPropagation()"><input type="checkbox" class="lead-chk-m" value="${l.id}" onchange="checkSelectionM()" style="width:18px;height:18px;cursor:pointer;"></div>` : ''}
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-right:24px;">
+              <p style="font-size:15px;font-weight:600;">${l.name || '-'}</p>
+              <span style="background:${bg};color:${color};border-radius:6px;font-size:11px;padding:2px 8px;font-weight:500;">${l.status}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+              <p style="font-size:13px;color:#9ca3af;">${l.contact || '연락처 없음'}</p>
+              ${l.region ? `<p style="font-size:12px;color:#6b7280;">📍${l.region}</p>` : ''}
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div style="display:flex;gap:8px;">
+                ${l.source ? `<span style="font-size:11px;color:#6b7280;">${l.source}</span>` : ''}
+                ${brand ? `<span style="font-size:11px;color:${brand.color};">· ${brand.name}</span>` : ''}
+              </div>
+              <div style="display:flex;gap:6px;" onclick="event.stopPropagation()">
+                ${l.contact ? `<a href="tel:${l.contact}" style="background:#1a3a1a;color:#22c55e;border-radius:8px;padding:4px 10px;font-size:11px;">📞</a>` : ''}
+                ${l.contact ? `<a href="sms:${l.contact}" style="background:#1e3a5f;color:#3b82f6;border-radius:8px;padding:4px 10px;font-size:11px;">💬</a>` : ''}
               </div>
             </div>
-            <span class="badge" style="background:${bg};color:${color}">${roleLabels[u.role]||u.role}</span>
           </div>`
-        }).join('')
-      : '<p class="text-xs text-gray-600 text-center py-4">팀원이 없습니다</p>'
-  }
+              }).join('')
+              : '<p style="font-size:13px;color:#6b7280;text-align:center;padding:32px;">리드가 없습니다</p>'
+          }
 
-  function generateInviteLink() {
-    const role = document.getElementById('inviteRole').value
-    const brandId = document.getElementById('inviteBrandId').value
-    const payload = { role, brandId, expires: Date.now() + 24*60*60*1000 }
-    const token = btoa(JSON.stringify(payload))
-    const baseUrl = window.location.origin + window.location.pathname
-    const link = `${baseUrl}?invite=${token}`
-    document.getElementById('inviteLinkInput').value = link
-    document.getElementById('inviteLinkBox').classList.remove('hidden')
-    pendingInviteLink = payload
-  }
+          function mobileFilterLeads(status) {
+            document.querySelectorAll('.mobile-stage-btn').forEach(b => {
+              b.style.background = '#1a1a1a'; b.style.color = '#6b7280'; b.style.borderColor = '#2a2a2a'
+            })
+            event.target.style.background = '#1e3a5f'; event.target.style.color = '#3b82f6'; event.target.style.borderColor = '#3b82f6'
+            renderMobileLeads(status === '전체' ? allLeads : allLeads.filter(l => l.status === status))
+          }
 
-  function copyInviteLink() {
-    const link = document.getElementById('inviteLinkInput').value
-    navigator.clipboard.writeText(link)
-    alert('링크가 복사됐어요!')
-  }
+          function mobileSearchLeads() {
+            const q = document.getElementById('mobileSearchInput').value.toLowerCase()
+            renderMobileLeads(allLeads.filter(l => (l.name || '').toLowerCase().includes(q) || (l.contact || '').includes(q)))
+          }
 
-  function shareKakao() {
-    const link = document.getElementById('inviteLinkInput').value
-    const msg = `정총무 CRM에 초대합니다!\n아래 링크로 접속해서 가입해주세요:\n${link}`
-    if (navigator.share) {
-      navigator.share({ title: '정총무 CRM 초대', text: msg, url: link })
-    } else {
-      navigator.clipboard.writeText(msg)
-      alert('초대 메시지가 복사됐어요! 카카오톡에 붙여넣기 해주세요.')
-    }
-  }
+          function toggleMobileSearch() {
+            const bar = document.getElementById('mobileSearchBar')
+            bar.classList.toggle('hidden')
+            if (!bar.classList.contains('hidden')) document.getElementById('mobileSearchInput').focus()
+          }
 
-  // ===== 리드 =====
-  async function loadLeads() {
-    let query = sb.from('leads').select('*').order('created_at', { ascending: false })
-    if (currentBrandId) query = query.eq('brand_id', currentBrandId)
-    const { data } = await query
-    allLeads = data || []
-    renderDashboard()
-    renderLeadsTable(allLeads)
-    renderPipeline()
-    renderBrandList()
-  }
+          async function openMobileDetail(id) {
+            currentLead = allLeads.find(l => l.id === id)
+            if (!currentLead) return
 
-  function renderDashboard() {
-    const now = new Date()
-    const total = allLeads.length
-    const newThisMonth = allLeads.filter(l => { const d = new Date(l.created_at); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear() }).length
-    const done = allLeads.filter(l => l.status==='완료').length
-    const overdue = allLeads.filter(l => l.next_contact_at && new Date(l.next_contact_at)<now && l.status!=='완료').length
-    const targetContract = Math.max(1, Math.round(total*0.05))
-    const currentRate = total>0 ? ((done/total)*100).toFixed(1) : 0
-    const achieveRate = Math.min(100, Math.round((done/targetContract)*100))
+            document.getElementById('mDetailAvatar').textContent = (currentLead.name || '?')[0]
+            document.getElementById('mDetailName').textContent = currentLead.name || '-'
+            document.getElementById('mDetailBadge').innerHTML = getBadge(currentLead.status)
+            document.getElementById('mDetailRegion').textContent = currentLead.region || '-'
+            document.getElementById('mDetailSource').textContent = currentLead.source || '-'
+            document.getElementById('mDetailBudget').textContent = currentLead.budget ? Number(currentLead.budget).toLocaleString() + '원' : '-'
+            document.getElementById('mDetailCreated').textContent = new Date(currentLead.created_at).toLocaleDateString('ko-KR')
 
-    document.getElementById('kpiNew').textContent = newThisMonth
-    document.getElementById('kpiTotal').textContent = total
-    document.getElementById('kpiDone').textContent = done
-    document.getElementById('kpiOverdue').textContent = overdue
-    document.getElementById('targetContract').textContent = targetContract+'건'
-    document.getElementById('currentRate').textContent = currentRate+'%'
-    document.getElementById('contractAchieve').textContent = achieveRate+'%'
-    document.getElementById('contractProgress').style.width = achieveRate+'%'
+            if (currentLead.contact) {
+              document.getElementById('mCallBtn').href = `tel:${currentLead.contact}`
+              document.getElementById('mSmsBtn').href = `sms:${currentLead.contact}`
+            }
 
-    const rateEl = document.getElementById('rateStatus')
-    if (currentRate>=5) { rateEl.textContent='🎯 목표 달성!'; rateEl.style.cssText='background:#1a3a1a;color:#22c55e;padding:4px 12px;border-radius:20px;' }
-    else if (currentRate>=3) { rateEl.textContent='📈 순항중'; rateEl.style.cssText='background:#3a2e1a;color:#f59e0b;padding:4px 12px;border-radius:20px;' }
-    else { rateEl.textContent='💪 분발 필요'; rateEl.style.cssText='background:#3a1a1a;color:#ef4444;padding:4px 12px;border-radius:20px;' }
+            if (currentLead.next_contact_at) document.getElementById('mNextContactDate').value = currentLead.next_contact_at.split('T')[0]
 
-    const stages = ['신규','상담중','미팅준비','계약검토','완료','보류']
-    const max = Math.max(...stages.map(s=>allLeads.filter(l=>l.status===s).length),1)
-    document.getElementById('stageChart').innerHTML = stages.map(s => {
-      const cnt=allLeads.filter(l=>l.status===s).length; const pct=Math.round((cnt/max)*100)
-      const [,color]=(statusColors[s]||'#1f1f1f|#6b7280').split('|')
-      return `<div><div class="flex justify-between text-xs mb-1"><span class="text-gray-400">${s}</span><span class="text-gray-500">${cnt}</span></div><div class="h-1.5 rounded-full" style="background:#1a1a1a"><div class="h-1.5 rounded-full" style="width:${pct}%;background:${color}"></div></div></div>`
-    }).join('')
+            document.getElementById('mStageButtons').innerHTML = ['신규', '상담중', '미팅준비', '계약검토', '완료', '보류'].map(s => {
+              const [bg, color] = (statusColors[s] || '#1f1f1f|#6b7280').split('|')
+              const isActive = s === currentLead.status
+              return `<button onclick="updateStatusDetail('${s}')" style="background:${isActive ? bg : '#1a1a1a'};color:${isActive ? color : '#6b7280'};border:1px solid ${isActive ? color : '#2a2a2a'};border-radius:20px;padding:5px 12px;font-size:11px;white-space:nowrap;">${isActive ? '✓ ' : ''}${s}</button>`
+            }).join('')
 
-    const funnelStages = [
-      {label:'전체 리드',key:null,color:'#3b82f6'},{label:'상담 진입',key:['상담중','미팅준비','계약검토','완료'],color:'#f59e0b'},
-      {label:'미팅 진입',key:['미팅준비','계약검토','완료'],color:'#f97316'},{label:'계약 검토',key:['계약검토','완료'],color:'#a855f7'},
-      {label:'계약 완료',key:['완료'],color:'#22c55e'}
-    ]
-    document.getElementById('funnelChart').innerHTML = funnelStages.map((f,i) => {
-      const cnt=f.key?allLeads.filter(l=>f.key.includes(l.status)).length:total
-      const pct=total>0?Math.round((cnt/total)*100):0
-      return `<div><div class="flex justify-between text-xs mb-1"><span class="text-gray-400">${f.label}</span><span class="text-gray-500">${cnt}건${i>0?' ('+pct+'%)':''}</span></div><div class="h-2 rounded-full" style="background:#1a1a1a"><div class="h-2 rounded-full" style="width:${i===0?100:pct}%;background:${f.color}"></div></div></div>`
-    }).join('')
+            await loadLogs()
+            showMobileScreen('detail')
+          }
 
-    const sources={}; allLeads.forEach(l=>{const s=l.source||'미분류';sources[s]=(sources[s]||0)+1})
-    const sortedSources=Object.entries(sources).sort((a,b)=>b[1]-a[1]); const maxSource=sortedSources[0]?.[1]||1
-    document.getElementById('sourceChart').innerHTML = sortedSources.length
-      ? sortedSources.map(([src,cnt])=>`<div><div class="flex justify-between text-xs mb-1"><span class="text-gray-400">${src}</span><span class="text-gray-500">${cnt}건</span></div><div class="h-1.5 rounded-full" style="background:#1a1a1a"><div class="h-1.5 rounded-full bg-blue-500" style="width:${Math.round((cnt/maxSource)*100)}%"></div></div></div>`).join('')
-      : '<p class="text-xs text-gray-600">데이터 없음</p>'
+          async function saveMobileNextContact() {
+            const date = document.getElementById('mNextContactDate').value
+            if (!date || !currentLead) return
+            await sb.from('leads').update({ next_contact_at: date }).eq('id', currentLead.id)
+            alert('저장됐어요!'); await loadLeads()
+          }
 
-    const overdueLeads=allLeads.filter(l=>l.next_contact_at&&new Date(l.next_contact_at)<now&&l.status!=='완료').slice(0,5)
-    document.getElementById('overdueCount').textContent=overdueLeads.length+'건'
-    document.getElementById('overdueList').innerHTML=overdueLeads.length
-      ? overdueLeads.map(l=>{const days=Math.floor((now-new Date(l.next_contact_at))/(1000*60*60*24)); return `<div onclick="openDetail('${l.id}')" class="p-2.5 rounded-lg cursor-pointer hover:bg-gray-900 transition" style="border:1px solid #2a1a1a;"><div class="flex items-center justify-between"><span class="text-xs font-medium">${l.name||'-'}</span><span class="text-xs text-red-400">${days}일 경과</span></div><p class="text-xs text-gray-600 mt-0.5">${l.contact||'-'}</p></div>`}).join('')
-      : '<p class="text-xs text-gray-600 text-center py-4">재접촉 대기 없음 👍</p>'
+          // ===== 공통 리드 함수 =====
+          function renderLeadsTable(leads) {
+            if (!document.getElementById('leadsTable')) return
 
-    document.getElementById('recentLeads').innerHTML = allLeads.slice(0,5).map(l=>`
-      <div class="lead-row flex items-center gap-4 px-3 py-2.5 rounded-lg" onclick="openDetail('${l.id}')" style="border-bottom:1px solid #111">
-        <span class="font-medium text-sm w-24 truncate">${l.name||'-'}</span>
-        <span class="text-xs text-gray-500 w-28 truncate">${l.contact||'-'}</span>
-        <span class="text-xs text-gray-500 w-20 truncate">${l.region||'-'}</span>
-        <span class="text-xs text-gray-500 flex-1">${l.source||'-'}</span>
-        ${getBadge(l.status)}
-      </div>`).join('') || '<p class="text-xs text-gray-600 py-4 text-center">리드가 없습니다</p>'
-  }
+            let showCheckbox = false;
+            if (currentUser) {
+              const myUser = allUsers.find(u => u.id === currentUser.id);
+              if (myUser && (myUser.role === 'super_admin' || myUser.role === 'manager')) showCheckbox = true;
+            }
+            if (document.getElementById('selectAllPC')) {
+              document.getElementById('selectAllPC').style.display = showCheckbox ? 'inline-block' : 'none';
+              document.getElementById('selectAllPC').checked = false;
+            }
 
-  function renderLeadsTable(leads) {
-    document.getElementById('leadsTable').innerHTML = leads.length
-      ? leads.map(l=>`
+            document.getElementById('leadsTable').innerHTML = leads.length
+              ? leads.map(l => `
         <tr class="lead-row" onclick="openDetail('${l.id}')" style="border-bottom:1px solid #111">
-          <td class="px-5 py-3 text-sm font-medium">${l.name||'-'}</td>
-          <td class="px-5 py-3 text-xs text-gray-400">${l.contact||'-'}</td>
-          <td class="px-5 py-3 text-xs text-gray-400">${l.region||'-'}</td>
-          <td class="px-5 py-3 text-xs text-gray-400">${l.source||'-'}</td>
-          <td class="px-5 py-3 text-xs text-gray-400">${l.budget?Number(l.budget).toLocaleString()+'원':'-'}</td>
+          <td class="px-5 py-3" onclick="event.stopPropagation()">
+            ${showCheckbox ? `<input type="checkbox" class="lead-chk cursor-pointer" value="${l.id}" onchange="checkSelection()">` : ''}
+          </td>
+          <td class="px-5 py-3 text-sm font-medium">${l.name || '-'}</td>
+          <td class="px-5 py-3 text-xs text-gray-400">${l.created_at ? new Date(l.created_at).toLocaleDateString('ko-KR') : '-'}</td>
+          <td class="px-5 py-3 text-xs text-gray-400">${l.contact || '-'}</td>
+          <td class="px-5 py-3 text-xs text-gray-400">${l.region || '-'}</td>
+          <td class="px-5 py-3 text-xs text-gray-400">${l.source || '-'}</td>
+          <td class="px-5 py-3 text-xs text-gray-400">${l.budget ? Number(l.budget).toLocaleString() + '원' : '-'}</td>
           <td class="px-5 py-3">${getBadge(l.status)}</td>
           <td class="px-5 py-3" onclick="event.stopPropagation()">
             <select onchange="updateStatus('${l.id}',this.value)" class="text-xs bg-transparent border border-gray-800 rounded px-2 py-1 text-gray-400">
-              ${['신규','상담중','미팅준비','계약검토','완료','보류'].map(s=>`<option value="${s}" ${s===l.status?'selected':''}>${s}</option>`).join('')}
+              ${['신규', '상담중', '미팅준비', '계약검토', '완료', '보류'].map(s => `<option value="${s}" ${s === l.status ? 'selected' : ''}>${s}</option>`).join('')}
             </select>
+            <button onclick="event.stopPropagation();deleteLead('${l.id}')" class="ml-2 text-xs text-red-400 hover:text-red-300">삭제</button>
           </td>
         </tr>`).join('')
-      : `<tr><td colspan="7" class="px-5 py-10 text-center text-xs text-gray-600">리드가 없습니다</td></tr>`
-  }
+              : `<tr><td colspan="8" class="px-5 py-10 text-center text-xs text-gray-600">리드가 없습니다</td></tr>`
 
-  function renderPipeline() {
-    const stages=['신규','상담중','미팅준비','계약검토','완료','보류']
-    stages.forEach(s=>{
-      const leads=allLeads.filter(l=>l.status===s)
-      document.getElementById('pipe-count-'+s).textContent=leads.length
-      document.getElementById('pipe-'+s).innerHTML=leads.map(l=>`
+            checkSelection()
+          }
+
+          function checkSelection() {
+            const checked = document.querySelectorAll('.lead-chk:checked')
+            const btn = document.getElementById('deleteAllBtnPC')
+            if (btn) {
+              if (checked.length > 0) { btn.textContent = `선택 삭제 (${checked.length})`; btn.classList.remove('hidden') }
+              else { btn.classList.add('hidden') }
+            }
+          }
+
+          function toggleSelectAll(checked) {
+            document.querySelectorAll('.lead-chk').forEach(c => c.checked = checked)
+            checkSelection()
+          }
+
+          function checkSelectionM() {
+            const checked = document.querySelectorAll('.lead-chk-m:checked');
+            const textEl = document.getElementById('deleteAllBtnMobileText');
+            if (textEl) textEl.textContent = `선택 삭제 (${checked.length}건)`;
+          }
+
+          function renderPipeline() {
+            const stages = ['신규', '상담중', '미팅준비', '계약검토', '완료', '보류']
+            stages.forEach(s => {
+              const el = document.getElementById('pipe-' + s); if (!el) return
+              const leads = allLeads.filter(l => l.status === s)
+              document.getElementById('pipe-count-' + s).textContent = leads.length
+              el.innerHTML = leads.map(l => `
         <div draggable="true" ondragstart="dragLeadId='${l.id}'" onclick="openDetail('${l.id}')"
           class="card p-3 cursor-pointer hover:border-gray-600 transition" style="border-radius:10px;">
-          <p class="text-sm font-medium text-white mb-1">${l.name||'-'}</p>
-          ${l.contact?`<p class="text-xs text-gray-500">📞 ${l.contact}</p>`:''}
-          ${l.region?`<p class="text-xs text-gray-500">📍 ${l.region}</p>`:''}
-          ${l.source?`<p class="text-xs text-gray-600">📢 ${l.source}</p>`:''}
-          ${l.budget?`<p class="text-xs text-gray-600 mt-1">💰 ${Number(l.budget).toLocaleString()}원</p>`:''}
+          <p class="text-sm font-medium mb-1">${l.name || '-'}</p>
+          ${l.contact ? `<p class="text-xs text-gray-500">📞 ${l.contact}</p>` : ''}
+          ${l.region ? `<p class="text-xs text-gray-500">📍 ${l.region}</p>` : ''}
+          ${l.source ? `<p class="text-xs text-gray-600">📢 ${l.source}</p>` : ''}
+          ${l.budget ? `<p class="text-xs text-gray-600 mt-1">💰 ${Number(l.budget).toLocaleString()}원</p>` : ''}
           <p class="text-xs text-gray-700 mt-2 pt-2" style="border-top:1px solid #1f1f1f">${new Date(l.created_at).toLocaleDateString('ko-KR')}</p>
         </div>`).join('') || `<p class="text-xs text-gray-700 text-center py-6">없음</p>`
-    })
-  }
+            })
+          }
 
-  async function dropLead(event, newStatus) {
-    event.preventDefault()
-    if (!dragLeadId) return
-    const lead=allLeads.find(l=>l.id===dragLeadId)
-    if (!lead||lead.status===newStatus) return
-    await sb.from('leads').update({status:newStatus}).eq('id',dragLeadId)
-    await sb.from('lead_logs').insert({lead_id:dragLeadId,status_changed_to:newStatus,note:`파이프라인 이동: ${lead.status} → ${newStatus}`})
-    dragLeadId=null
-    await loadLeads()
-  }
+          async function dropLead(event, newStatus) {
+            event.preventDefault()
+            if (!dragLeadId) return
+            const lead = allLeads.find(l => l.id === dragLeadId)
+            if (!lead || lead.status === newStatus) return
+            await sb.from('leads').update({ status: newStatus }).eq('id', dragLeadId)
+            await sb.from('lead_logs').insert({ lead_id: dragLeadId, status_changed_to: newStatus, note: `파이프라인 이동: ${lead.status}→${newStatus}` })
+            dragLeadId = null; await loadLeads()
+          }
 
-  async function openDetail(id) {
-    currentLead=allLeads.find(l=>l.id===id)
-    if (!currentLead) return
-    document.getElementById('detailAvatar').textContent=(currentLead.name||'?')[0]
-    document.getElementById('detailName').textContent=currentLead.name||'-'
-    document.getElementById('detailBadge').innerHTML=getBadge(currentLead.status)
-    document.getElementById('detailContact').textContent=currentLead.contact||'-'
-    document.getElementById('detailRegion').textContent=currentLead.region||'-'
-    document.getElementById('detailSource').textContent=currentLead.source||'-'
-    document.getElementById('detailBudget').textContent=currentLead.budget?Number(currentLead.budget).toLocaleString()+'원':'-'
-    document.getElementById('detailCreated').textContent=new Date(currentLead.created_at).toLocaleDateString('ko-KR')
-    if (currentLead.next_contact_at) document.getElementById('nextContactDate').value=currentLead.next_contact_at.split('T')[0]
-    document.getElementById('stageButtons').innerHTML=['신규','상담중','미팅준비','계약검토','완료','보류'].map(s=>{
-      const [bg,color]=(statusColors[s]||'#1f1f1f|#6b7280').split('|'); const isActive=s===currentLead.status
-      return `<button onclick="updateStatusDetail('${s}')" class="w-full text-left text-xs px-3 py-2 rounded-lg transition" style="background:${isActive?bg:'#1a1a1a'};color:${isActive?color:'#6b7280'};border:1px solid ${isActive?color:'#2a2a2a'}">${isActive?'✓ ':''}${s}</button>`
-    }).join('')
-    await loadLogs()
-    showScreen('detail')
-    document.getElementById('backBtn').classList.remove('hidden')
-  }
+          async function openDetail(id) {
+            currentLead = allLeads.find(l => l.id === id)
+            if (!currentLead) return
+            document.getElementById('detailAvatar').textContent = (currentLead.name || '?')[0]
+            document.getElementById('detailName').textContent = currentLead.name || '-'
+            document.getElementById('detailBadge').innerHTML = getBadge(currentLead.status)
+            document.getElementById('detailContact').textContent = currentLead.contact || '-'
+            document.getElementById('detailRegion').textContent = currentLead.region || '-'
+            document.getElementById('detailSource').textContent = currentLead.source || '-'
+            document.getElementById('detailBudget').textContent = currentLead.budget ? Number(currentLead.budget).toLocaleString() + '원' : '-'
+            document.getElementById('detailCreated').textContent = new Date(currentLead.created_at).toLocaleDateString('ko-KR')
+            if (currentLead.contact) {
+              document.getElementById('callBtn').href = `tel:${currentLead.contact}`
+              document.getElementById('smsBtn').href = `sms:${currentLead.contact}`
+            }
+            if (currentLead.next_contact_at) document.getElementById('nextContactDate').value = currentLead.next_contact_at.split('T')[0]
+            document.getElementById('stageButtons').innerHTML = ['신규', '상담중', '미팅준비', '계약검토', '완료', '보류'].map(s => {
+              const [bg, color] = (statusColors[s] || '#1f1f1f|#6b7280').split('|'); const isActive = s === currentLead.status
+              return `<button onclick="updateStatusDetail('${s}')" class="w-full text-left text-xs px-3 py-2 rounded-lg transition" style="background:${isActive ? bg : '#1a1a1a'};color:${isActive ? color : '#6b7280'};border:1px solid ${isActive ? color : '#2a2a2a'}">${isActive ? '✓ ' : ''}${s}</button>`
+            }).join('')
+            await loadLogs()
+            showScreen('detail')
+            document.getElementById('backBtn').classList.remove('hidden')
+          }
 
-  async function loadLogs() {
-    const {data}=await sb.from('lead_logs').select('*').eq('lead_id',currentLead.id).order('created_at',{ascending:false})
-    const logs=data||[]
-    const resultColors={'연결됨':'#3b82f6','부재중':'#f59e0b','거절':'#ef4444','긍정':'#22c55e','보류':'#6b7280'}
-    document.getElementById('logList').innerHTML=logs.length
-      ? logs.map(log=>`
-        <div class="log-item mb-3" style="border-color:${resultColors[log.contact_result]||'#1f1f1f'}">
+          async function loadLogs() {
+            const target = isMobile() ? 'mLogList' : 'logList'
+            if (!document.getElementById(target)) return
+            const { data } = await sb.from('lead_logs').select('*').eq('lead_id', currentLead.id).order('created_at', { ascending: false })
+            const logs = data || []
+            const resultColors = { '연결됨': '#3b82f6', '부재중': '#f59e0b', '거절': '#ef4444', '긍정': '#22c55e', '보류': '#6b7280' }
+            document.getElementById(target).innerHTML = logs.length
+              ? logs.map(log => `
+        <div class="log-item mb-3" style="border-color:${resultColors[log.contact_result] || '#1f1f1f'}">
           <div class="flex items-center gap-2 mb-1">
-            ${log.contact_result?`<span class="text-xs font-medium" style="color:${resultColors[log.contact_result]}">${log.contact_result}</span>`:''}
-            ${log.status_changed_to?`<span class="text-xs text-gray-600">→ ${log.status_changed_to}</span>`:''}
+            ${log.contact_result ? `<span class="text-xs font-medium" style="color:${resultColors[log.contact_result]}">${log.contact_result}</span>` : ''}
+            ${log.status_changed_to ? `<span class="text-xs text-gray-600">→ ${log.status_changed_to}</span>` : ''}
             <span class="text-xs text-gray-600 ml-auto">${new Date(log.created_at).toLocaleDateString('ko-KR')}</span>
           </div>
-          ${log.note?`<p class="text-xs text-gray-400">${log.note}</p>`:''}
+          ${log.note ? `<p class="text-xs text-gray-400">${log.note}</p>` : ''}
         </div>`).join('')
-      : '<p class="text-xs text-gray-600">아직 활동 기록이 없습니다</p>'
-  }
+              : '<p class="text-xs text-gray-600">활동 기록이 없습니다</p>'
+          }
 
-  function setResult(result) {
-    selectedResult=result
-    document.querySelectorAll('.result-btn').forEach(b=>{b.style.borderColor='#374151';b.style.color='#9ca3af'})
-    event.target.style.borderColor='#3b82f6'; event.target.style.color='#3b82f6'
-  }
+          function setResult(result) {
+            selectedResult = result
+            document.querySelectorAll('.result-btn').forEach(b => { b.style.borderColor = '#374151'; b.style.color = '#9ca3af' })
+            event.target.style.borderColor = '#3b82f6'; event.target.style.color = '#3b82f6'
+          }
 
-  async function addLog() {
-    if (!currentLead) return
-    const note=document.getElementById('logNote').value
-    if (!note&&!selectedResult) return alert('결과 또는 메모를 입력해주세요')
-    await sb.from('lead_logs').insert({lead_id:currentLead.id,contact_result:selectedResult||null,note:note||null})
-    document.getElementById('logNote').value=''; selectedResult=''
-    document.querySelectorAll('.result-btn').forEach(b=>{b.style.borderColor='#374151';b.style.color='#9ca3af'})
-    await loadLogs()
-  }
+          async function addLog() {
+            if (!currentLead) return
+            const note = document.getElementById('logNote').value
+            if (!note && !selectedResult) return alert('결과 또는 메모를 입력해주세요')
+            await sb.from('lead_logs').insert({ lead_id: currentLead.id, contact_result: selectedResult || null, note: note || null })
+            document.getElementById('logNote').value = ''; selectedResult = ''
+            document.querySelectorAll('.result-btn').forEach(b => { b.style.borderColor = '#374151'; b.style.color = '#9ca3af' })
+            await loadLogs()
+          }
 
-  async function updateStatus(id,status) {
-    await sb.from('leads').update({status}).eq('id',id)
-    await loadLeads()
-  }
+          async function updateStatus(id, status) { await sb.from('leads').update({ status }).eq('id', id); await loadLeads() }
 
-  async function updateStatusDetail(status) {
-    await sb.from('leads').update({status}).eq('id',currentLead.id)
-    await sb.from('lead_logs').insert({lead_id:currentLead.id,status_changed_to:status,note:`단계 변경: ${currentLead.status} → ${status}`})
-    currentLead.status=status
-    await loadLeads(); openDetail(currentLead.id)
-  }
+          async function updateStatusDetail(status) {
+            if (!currentLead) return
+            await sb.from('leads').update({ status }).eq('id', currentLead.id)
+            await sb.from('lead_logs').insert({ lead_id: currentLead.id, status_changed_to: status, note: `단계 변경: ${currentLead.status}→${status}` })
+            currentLead.status = status; await loadLeads()
+            if (isMobile()) openMobileDetail(currentLead.id)
+            else openDetail(currentLead.id)
+          }
 
-  async function saveNextContact() {
-    const date=document.getElementById('nextContactDate').value
-    if (!date) return
-    await sb.from('leads').update({next_contact_at:date}).eq('id',currentLead.id)
-    alert('재접촉일이 저장됐어요!'); await loadLeads()
-  }
+          async function saveNextContact() {
+            const date = document.getElementById('nextContactDate').value
+            if (!date) return
+            await sb.from('leads').update({ next_contact_at: date }).eq('id', currentLead.id)
+            alert('저장됐어요!'); await loadLeads()
+          }
 
-  function filterLeads(status) {
-    document.querySelectorAll('.stage-btn').forEach(b=>{b.classList.remove('border-blue-600','text-blue-400');b.classList.add('border-gray-800','text-gray-400')})
-    event.target.classList.add('border-blue-600','text-blue-400'); event.target.classList.remove('border-gray-800','text-gray-400')
-    renderLeadsTable(status==='전체'?allLeads:allLeads.filter(l=>l.status===status))
-  }
+          async function deleteLead(id) {
+            if (!confirm('정말 삭제할까요?')) return
+            await sb.from('lead_logs').delete().eq('lead_id', id)
+            await sb.from('leads').delete().eq('id', id)
+            await loadLeads()
+          }
 
-  function goBack() { showScreen('leads'); document.getElementById('backBtn').classList.add('hidden') }
+          async function deleteSelectedLeads(type = 'pc') {
+            if (!currentUser) return;
+            const myUser = allUsers.find(u => u.id === currentUser.id);
+            if (!myUser || (myUser.role !== 'super_admin' && myUser.role !== 'manager')) {
+              return alert('권한이 없습니다.');
+            }
+            const chkClass = type === 'pc' ? '.lead-chk:checked' : '.lead-chk-m:checked';
+            const checked = document.querySelectorAll(chkClass);
+            if (checked.length === 0) return alert('삭제할 항목을 먼저 선택해주세요.');
 
-  function showScreen(name) {
-    ['dashboard','leads','detail','pipeline','brands','team','upload'].forEach(s=>{
-      document.getElementById('screen'+s.charAt(0).toUpperCase()+s.slice(1))?.classList.add('hidden')
-      document.getElementById('nav-'+s)?.classList.remove('active')
-      document.getElementById('nav-'+s)?.classList.add('text-gray-400')
-    })
-    document.getElementById('screen'+name.charAt(0).toUpperCase()+name.slice(1))?.classList.remove('hidden')
-    document.getElementById('nav-'+name)?.classList.add('active')
-    document.getElementById('nav-'+name)?.classList.remove('text-gray-400')
-    const titles={dashboard:'대시보드',leads:'리드 관리',detail:'리드 상세',pipeline:'파이프라인',brands:'브랜드 관리',team:'팀 관리',upload:'DB 업로드'}
-    document.getElementById('pageTitle').textContent=titles[name]||''
-    if (name!=='detail') document.getElementById('backBtn').classList.add('hidden')
-  }
+            if (!confirm(`전체 ${checked.length}건을 삭제하시겠습니까?\n이 작업은 복구할 수 없습니다.`)) return;
 
-  function showAddLead() { document.getElementById('addLeadModal').classList.remove('hidden') }
-  function closeAddLead() { document.getElementById('addLeadModal').classList.add('hidden') }
+            const targetIds = Array.from(checked).map(c => c.value);
+            for (let i = 0; i < targetIds.length; i += 100) {
+              const chunk = targetIds.slice(i, i + 100);
+              await sb.from('lead_logs').delete().in('lead_id', chunk);
+              await sb.from('leads').delete().in('id', chunk);
+            }
+            await loadLeads();
+            if (type === 'pc') document.getElementById('selectAllPC').checked = false;
+            else checkSelectionM();
+            alert(`${targetIds.length}건이 성공적으로 삭제되었습니다.`);
+          }
 
-  async function addLead() {
-    const name=document.getElementById('addName').value
-    if (!name) return alert('이름을 입력해주세요')
-    await sb.from('leads').insert({
-      name, contact:document.getElementById('addContact').value,
-      region:document.getElementById('addRegion').value,
-      source:document.getElementById('addSource').value,
-      budget:document.getElementById('addBudget').value||null,
-      status:document.getElementById('addStatus').value,
-      brand_id:document.getElementById('addBrand').value||null,
-    })
-    closeAddLead(); await loadLeads()
-  }
+          function filterLeads(status) {
+            document.querySelectorAll('.stage-btn').forEach(b => { b.classList.remove('border-blue-600', 'text-blue-400'); b.classList.add('border-gray-800', 'text-gray-400') })
+            event.target.classList.add('border-blue-600', 'text-blue-400'); event.target.classList.remove('border-gray-800', 'text-gray-400')
+            renderLeadsTable(status === '전체' ? allLeads : allLeads.filter(l => l.status === status))
+          }
 
-  // ===== 엑셀/CSV 업로드 =====
-  const colMap={name:['이름','성함','name','성명','고객명'],contact:['연락처','전화','핸드폰','휴대폰','phone','tel','전화번호'],region:['지역','희망지역','지점','희망상권','지역명'],budget:['예산','투자금','투자예산','자본금'],source:['유입경로','채널','매체','출처','광고채널']}
-  let parsedLeads=[]
+          function searchLeads() {
+            const q = document.getElementById('searchInput').value.toLowerCase()
+            renderLeadsTable(allLeads.filter(l => (l.name || '').toLowerCase().includes(q) || (l.contact || '').includes(q) || (l.region || '').toLowerCase().includes(q)))
+          }
 
-  function handleDrop(e) { e.preventDefault(); document.getElementById('dropZone').style.borderColor='#374151'; const file=e.dataTransfer.files[0]; if(file) processFile(file) }
-  function handleFile(e) { const file=e.target.files[0]; if(file) processFile(file) }
+          function goBack() { showScreen('leads'); document.getElementById('backBtn').classList.add('hidden') }
 
-  function processFile(file) {
-    const ext=file.name.split('.').pop().toLowerCase(); const reader=new FileReader()
-    if (ext==='csv') { reader.onload=(e)=>parseCSV(e.target.result); reader.readAsText(file,'UTF-8') }
-    else if (ext==='xlsx'||ext==='xls') {
-      reader.onload=(e)=>{ const data=new Uint8Array(e.target.result); const wb=XLSX.read(data,{type:'array'}); parseCSV(XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]])) }
-      reader.readAsArrayBuffer(file)
-    } else alert('CSV 또는 엑셀 파일만 가능합니다')
-  }
+          // ===== 화면 전환 =====
+          function showScreen(name) {
+            ['dashboard', 'leads', 'detail', 'pipeline', 'brands', 'team', 'upload'].forEach(s => {
+              document.getElementById('screen' + s.charAt(0).toUpperCase() + s.slice(1))?.classList.add('hidden')
+              document.getElementById('nav-' + s)?.classList.remove('active')
+              document.getElementById('nav-' + s)?.classList.add('text-gray-400')
+            })
+            document.getElementById('screen' + name.charAt(0).toUpperCase() + name.slice(1))?.classList.remove('hidden')
+            document.getElementById('nav-' + name)?.classList.add('active')
+            document.getElementById('nav-' + name)?.classList.remove('text-gray-400')
+            const titles = { dashboard: '대시보드', leads: '리드 관리', detail: '리드 상세', pipeline: '파이프라인', brands: '브랜드 관리', team: '팀 관리', upload: 'DB 업로드' }
+            if (document.getElementById('pageTitle')) document.getElementById('pageTitle').textContent = titles[name] || ''
+            if (name !== 'detail' && document.getElementById('backBtn')) document.getElementById('backBtn').classList.add('hidden')
+          }
 
-  function parseCSV(text) {
-    const lines=text.trim().split('\n'); if(lines.length<2) return alert('데이터가 없습니다')
-    const headers=lines[0].split(',').map(h=>h.trim().replace(/"/g,''))
-    const mapping={}; headers.forEach((h,i)=>{ for(const [field,aliases] of Object.entries(colMap)){if(aliases.some(a=>h.includes(a)))mapping[field]=i} })
-    const brandId=document.getElementById('uploadBrandId').value||null
-    parsedLeads=lines.slice(1).filter(l=>l.trim()).map(line=>{
-      const cols=line.split(',').map(c=>c.trim().replace(/"/g,''))
-      return {name:mapping.name!==undefined?cols[mapping.name]:null,contact:mapping.contact!==undefined?cols[mapping.contact]:null,region:mapping.region!==undefined?cols[mapping.region]:null,budget:mapping.budget!==undefined?(parseInt(cols[mapping.budget].replace(/[^0-9]/g,''))||null):null,source:mapping.source!==undefined?cols[mapping.source]:null,status:'신규',brand_id:brandId}
-    }).filter(l=>l.name)
-    if(!parsedLeads.length) return alert('이름 컬럼을 찾을 수 없습니다')
-    document.getElementById('previewCount').textContent=parsedLeads.length+'건'
-    document.getElementById('previewHead').innerHTML=`<tr style="border-bottom:1px solid #1f1f1f"><th class="text-left px-4 py-2 text-gray-500">이름</th><th class="text-left px-4 py-2 text-gray-500">연락처</th><th class="text-left px-4 py-2 text-gray-500">지역</th><th class="text-left px-4 py-2 text-gray-500">채널</th><th class="text-left px-4 py-2 text-gray-500">예산</th></tr>`
-    document.getElementById('previewBody').innerHTML=parsedLeads.slice(0,10).map(l=>`<tr style="border-bottom:1px solid #111"><td class="px-4 py-2 text-gray-300">${l.name||'-'}</td><td class="px-4 py-2 text-gray-400">${l.contact||'-'}</td><td class="px-4 py-2 text-gray-400">${l.region||'-'}</td><td class="px-4 py-2 text-gray-400">${l.source||'-'}</td><td class="px-4 py-2 text-gray-400">${l.budget?l.budget.toLocaleString()+'원':'-'}</td></tr>`).join('')
-    document.getElementById('previewSection').classList.remove('hidden')
-    document.getElementById('uploadResult').classList.add('hidden')
-  }
+          function showMobileScreen(name) {
+            const screens = ['home', 'leads', 'detail', 'pipeline', 'more', 'brands', 'team', 'upload']
+            screens.forEach(s => {
+              const el = document.getElementById('mobileScreen' + s.charAt(0).toUpperCase() + s.slice(1))
+              if (el) el.classList.add('hidden')
+            })
+            const target = document.getElementById('mobileScreen' + name.charAt(0).toUpperCase() + name.slice(1))
+            if (target) target.classList.remove('hidden')
 
-  async function uploadLeads() {
-    if(!parsedLeads.length) return
-    const {error}=await sb.from('leads').insert(parsedLeads)
-    if(error){alert('오류: '+error.message);return}
-    document.getElementById('uploadResult').textContent=`✅ ${parsedLeads.length}건 리드 등록 완료!`
-    document.getElementById('uploadResult').classList.remove('hidden')
-    document.getElementById('previewSection').classList.add('hidden')
-    parsedLeads=[]; await loadLeads()
-  }
+            const tabs = ['home', 'leads', 'pipeline', 'more']
+            tabs.forEach(t => {
+              const btn = document.getElementById('mtab-' + t)
+              if (btn) btn.style.color = t === name ? '#3b82f6' : '#6b7280'
+            })
 
-  function clearUpload() { parsedLeads=[]; document.getElementById('previewSection').classList.add('hidden'); document.getElementById('fileInput').value='' }
+            const pageNames = { home: '홈', leads: '리드 관리', detail: '리드 상세', pipeline: '파이프라인', more: '더보기', brands: '브랜드', team: '팀 관리', upload: 'DB 업로드' }
+            if (document.getElementById('mobilePage')) document.getElementById('mobilePage').textContent = pageNames[name] || ''
 
-  function exportExcel() {
-    if(!allLeads.length) return alert('내보낼 데이터가 없습니다')
-    const rows=allLeads.map(l=>({'이름':l.name||'','연락처':l.contact||'','지역':l.region||'','채널':l.source||'','예산':l.budget||'','단계':l.status||'','재접촉일':l.next_contact_at?l.next_contact_at.split('T')[0]:'','유입일':l.created_at?new Date(l.created_at).toLocaleDateString('ko-KR'):'' }))
-    const ws=XLSX.utils.json_to_sheet(rows); const wb=XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb,ws,'리드목록')
-    XLSX.writeFile(wb,`정총무_리드_${new Date().toLocaleDateString('ko-KR').replace(/\./g,'').replace(/ /g,'')}.xlsx`)
-  }
+            // 파이프라인 모바일에서도 보이게
+            if (name === 'pipeline') renderPipeline()
+          }
 
-  // ===== 초기화 =====
-  window.addEventListener('load', () => {
-    if (!checkInviteToken()) {
-      sb.auth.getSession().then(({data})=>{ if(data.session) initApp(data.session.user) })
-    }
-  })
-</script>
+          // ===== 파일 업로드 =====
+          function parseKorDate(str) {
+            if (!str) return undefined
+            str = String(str).trim()
+            if (/^\d{5}(\.\d+)?$/.test(str)) {
+              const serial = parseFloat(str)
+              if (serial > 20000 && serial < 80000) {
+                const d = new Date(Math.round((serial - 25569) * 86400 * 1000))
+                return d.toISOString()
+              }
+            }
+            let d = new Date(str.replace(/오후/g, 'PM').replace(/오전/g, 'AM'))
+            if (!isNaN(d.getTime()) && d.getFullYear() > 2000) return d.toISOString()
+            const numMatch = str.match(/\d+/g)
+            if (numMatch && numMatch.length >= 2) {
+              let y = numMatch[0], m = numMatch[1], dt = numMatch[2] || '01'
+              if (y.length <= 2) y = '20' + y.padStart(2, '0')
+              const fallback = new Date(`${y}-${m.padStart(2, '0')}-${dt.padStart(2, '0')}T00:00:00.000Z`)
+              if (!isNaN(fallback.getTime()) && fallback.getFullYear() > 2000) return fallback.toISOString()
+            }
+            return undefined
+          }
+          const colMap = {
+            name: ['이름', '성함', '성명', '고객명', '고객이름', 'name', '신청자', '신청자명', '고객', '예비창업자', '문의자', '신청인', '이름(성함)'],
+            contact: ['연락처', '전화', '전화번호', '핸드폰', '휴대폰', '휴대전화', 'phone', 'tel', 'mobile', '핸드폰번호', '휴대폰번호', 'hp', '번호', '연락가능번호'],
+            region: ['지역', '희망지역', '희망상권', '희망지점', '지점', '지역명', '거주지역', '관심지역', '희망개점지역', 'area', 'region', '창업희망지역', '예정지역'],
+            budget: ['예산', '투자금', '투자예산', '자본금', '투자가능금액', 'budget', '창업예산', '가용자금', '투자금액', '준비자금', '창업자금'],
+            source: ['유입경로', '채널', '매체', '출처', '광고채널', '광고매체', 'source', '인입경로', '경로', '광고', '접수경로', '신청경로'],
+            created_at: ['접수일시', '접수일', '신청일', '신청일시', '인입일', '인입일시', '문의일', '문의일시', '타임스탬프', 'timestamp', 'date', '날짜', '등록일', '등록일시', '작성일', '상담일'],
+            status: ['단계', '현재단계', '진행단계', '상태', 'status', '처리현황', '처리상태', '진행상황'],
+            note: ['고객메모', '메모', '상담내용', '상담메모', '비고', '특이사항', '내용', 'note', 'memo', '히스토리', 'history', '상담히스토리', '과거상담', '이력', '상담이력', '기존상담']
+          }
+
+          const crmFieldLabels = {
+            name: '이름 *', contact: '연락처', region: '지역', budget: '예산',
+            source: '채널', created_at: '인입일', status: '단계', note: '메모',
+            ignore: '무시 (가져오지 않음)'
+          }
+
+          let parsedLeads = []
+          let rawHeaders = []
+          let rawRows = []
+          let currentMapping = {}
+
+          function autoDetectField(header) {
+            const clean = header.trim().replace(/\s+/g, '').replace(/[()（）\[\]]/g, '').toLowerCase()
+            for (const [field, aliases] of Object.entries(colMap)) {
+              if (aliases.some(a => {
+                const ac = a.replace(/\s+/g, '').replace(/[()（）\[\]]/g, '').toLowerCase()
+                return clean.includes(ac) || ac.includes(clean)
+              })) return field
+            }
+            return 'ignore'
+          }
+
+          function handleDrop(e) {
+            e.preventDefault()
+            document.getElementById('dropZone').style.borderColor = '#374151'
+            const file = e.dataTransfer.files[0]
+            if (file) processFile(file)
+          }
+          function handleFile(e) { const file = e.target.files[0]; if (file) processFile(file) }
+          function handleMobileFile(e) { const file = e.target.files[0]; if (file) processFileMobile(file) }
+
+          function processFile(file) {
+            const ext = file.name.split('.').pop().toLowerCase()
+            const reader = new FileReader()
+            if (ext === 'csv') {
+              reader.onload = (e) => parseForMapping(e.target.result)
+              reader.readAsText(file, 'UTF-8')
+            } else if (ext === 'xlsx' || ext === 'xls') {
+              reader.onload = (e) => {
+                const data = new Uint8Array(e.target.result)
+                const wb = XLSX.read(data, { type: 'array' })
+                parseForMapping(XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]))
+              }
+              reader.readAsArrayBuffer(file)
+            } else alert('CSV 또는 엑셀 파일만 가능합니다')
+          }
+
+          function processFileMobile(file) {
+            const ext = file.name.split('.').pop().toLowerCase()
+            const reader = new FileReader()
+            if (ext === 'csv') {
+              reader.onload = (e) => parseForMappingMobile(e.target.result)
+              reader.readAsText(file, 'UTF-8')
+            } else if (ext === 'xlsx' || ext === 'xls') {
+              reader.onload = (e) => {
+                const data = new Uint8Array(e.target.result)
+                const wb = XLSX.read(data, { type: 'array' })
+                parseForMappingMobile(XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]))
+              }
+              reader.readAsArrayBuffer(file)
+            } else alert('CSV 또는 엑셀 파일만 가능합니다')
+          }
+
+          function splitCsv(str) {
+            let res = [], inQ = false, cur = ''
+            for (let i = 0; i < str.length; i++) {
+              const char = str[i]
+              if (char === '"' && str[i + 1] === '"') { cur += '"'; i++ }
+              else if (char === '"') inQ = !inQ
+              else if (char === ',' && !inQ) { res.push(cur.trim()); cur = '' }
+              else cur += char
+            }
+            res.push(cur.trim())
+            return res
+          }
+
+          function parseForMapping(text) {
+            const lines = text.trim().split('\n')
+            if (lines.length < 2) return alert('데이터가 없습니다')
+            rawHeaders = splitCsv(lines[0])
+            rawRows = lines.slice(1).filter(l => l.trim()).map(l => splitCsv(l))
+
+            // 자동 매핑
+            currentMapping = {}
+            rawHeaders.forEach((h, i) => { currentMapping[i] = autoDetectField(h) })
+
+            // 매핑 테이블 렌더
+            renderMappingTable()
+            document.getElementById('dropZone').classList.add('hidden')
+            document.getElementById('mappingSection').classList.remove('hidden')
+            document.getElementById('previewSection').classList.add('hidden')
+          }
+
+          function renderMappingTable() {
+            const fieldOptions = Object.entries(crmFieldLabels).map(([v, l]) =>
+              `<option value="${v}">${l}</option>`
+            ).join('')
+
+            document.getElementById('mappingTable').innerHTML = rawHeaders.map((h, i) => {
+              const detected = currentMapping[i]
+              const isAuto = detected !== 'ignore'
+              const sampleData = rawRows.slice(0, 3).map(r => r[i] || '').filter(Boolean).join(', ')
+
+              return `<tr style="border-bottom:1px solid #111;">
+      <td class="px-4 py-3 font-medium text-gray-300">${h}</td>
+      <td class="px-4 py-3 text-gray-500 max-w-xs truncate">${sampleData || '-'}</td>
+      <td class="px-4 py-3">
+        <div class="flex items-center gap-2">
+          ${isAuto ? '<span class="text-green-400 text-xs">✅</span>' : '<span class="text-gray-600 text-xs">❓</span>'}
+          <select onchange="currentMapping[${i}]=this.value"
+            class="text-xs rounded-lg px-2 py-1.5"
+            style="background:#1a1a1a;border:1px solid ${isAuto ? '#22c55e' : '#f59e0b'};color:${isAuto ? '#22c55e' : '#f59e0b'};outline:none;">
+            ${Object.entries(crmFieldLabels).map(([v, l]) =>
+                `<option value="${v}" ${v === detected ? 'selected' : ''}>${l}</option>`
+              ).join('')}
+          </select>
+        </div>
+      </td>
+    </tr>`
+            }).join('')
+          }
+
+          function applyMappingAndPreview() {
+            const brandId = document.getElementById('uploadBrandId')?.value || null
+
+            parsedLeads = rawRows.map(cols => {
+              const lead = { status: '신규', brand_id: brandId }
+              let tempNote = null
+
+              Object.entries(currentMapping).forEach(([colIdx, field]) => {
+                if (field === 'ignore') return
+                const val = cols[parseInt(colIdx)] || ''
+                if (!val.trim()) return
+
+                if (field === 'note') { tempNote = val; return }
+                if (field === 'created_at') {
+                  const parsed = parseKorDate(val)
+                  if (parsed) lead.created_at = parsed
+                  return
+                }
+                if (field === 'budget') {
+                  const num = parseInt(val.replace(/[^0-9]/g, ''))
+                  if (num) lead.budget = num
+                  return
+                }
+                if (field === 'status') {
+                  const validStatuses = ['신규', '상담중', '미팅준비', '계약검토', '완료', '보류']
+                  if (validStatuses.includes(val.trim())) lead.status = val.trim()
+                  return
+                }
+                lead[field] = val
+              })
+
+              lead._tempNote = tempNote
+              return lead
+            }).filter(l => l.name && l.name.trim())
+
+            if (!parsedLeads.length) return alert('이름 데이터가 없습니다. 이름 컬럼 매핑을 확인해주세요.')
+
+            // 미리보기
+            document.getElementById('previewCount').textContent = parsedLeads.length + '건'
+            document.getElementById('previewHead').innerHTML = `
+    <tr style="border-bottom:1px solid #1f1f1f">
+      <th class="text-left px-3 py-2 text-gray-500">이름</th>
+      <th class="text-left px-3 py-2 text-gray-500">연락처</th>
+      <th class="text-left px-3 py-2 text-gray-500">지역</th>
+      <th class="text-left px-3 py-2 text-gray-500">채널</th>
+      <th class="text-left px-3 py-2 text-gray-500">단계</th>
+      <th class="text-left px-3 py-2 text-gray-500">인입일</th>
+    </tr>`
+            document.getElementById('previewBody').innerHTML = parsedLeads.slice(0, 10).map(l => `
+    <tr style="border-bottom:1px solid #111">
+      <td class="px-3 py-2 text-gray-300">${l.name || '-'}</td>
+      <td class="px-3 py-2 text-gray-400">${l.contact || '-'}</td>
+      <td class="px-3 py-2 text-gray-400">${l.region || '-'}</td>
+      <td class="px-3 py-2 text-gray-400">${l.source || '-'}</td>
+      <td class="px-3 py-2">${getBadge(l.status)}</td>
+      <td class="px-3 py-2 text-gray-400">${l.created_at ? new Date(l.created_at).toLocaleDateString('ko-KR') : '-'}</td>
+    </tr>`).join('')
+
+            document.getElementById('mappingSection').classList.add('hidden')
+            document.getElementById('previewSection').classList.remove('hidden')
+          }
+
+          function backToMapping() {
+            document.getElementById('previewSection').classList.add('hidden')
+            document.getElementById('mappingSection').classList.remove('hidden')
+          }
+
+          function parseForMappingMobile(text) {
+            const lines = text.trim().split('\n')
+            if (lines.length < 2) return alert('데이터가 없습니다')
+            rawHeaders = splitCsv(lines[0])
+            rawRows = lines.slice(1).filter(l => l.trim()).map(l => splitCsv(l))
+            currentMapping = {}
+            rawHeaders.forEach((h, i) => { currentMapping[i] = autoDetectField(h) })
+
+            // 모바일은 자동매핑만 하고 바로 파싱
+            const brandId = document.getElementById('mUploadBrandId')?.value || null
+            parsedLeads = rawRows.map(cols => {
+              const lead = { status: '신규', brand_id: brandId }
+              let tempNote = null
+              Object.entries(currentMapping).forEach(([colIdx, field]) => {
+                if (field === 'ignore') return
+                const val = cols[parseInt(colIdx)] || ''
+                if (!val.trim()) return
+                if (field === 'note') { tempNote = val; return }
+                if (field === 'created_at') { const p = parseKorDate(val); if (p) lead.created_at = p; return }
+                if (field === 'budget') { const n = parseInt(val.replace(/[^0-9]/g, '')); if (n) lead.budget = n; return }
+                if (field === 'status') { const v = ['신규', '상담중', '미팅준비', '계약검토', '완료', '보류']; if (v.includes(val.trim())) lead.status = val.trim(); return }
+                lead[field] = val
+              })
+              lead._tempNote = tempNote
+              return lead
+            }).filter(l => l.name && l.name.trim())
+
+            if (!parsedLeads.length) return alert('이름 컬럼을 찾을 수 없습니다')
+
+            document.getElementById('mPreviewCount').textContent = parsedLeads.length + '건'
+            document.getElementById('mPreviewHead').innerHTML = `<tr style="border-bottom:1px solid #1f1f1f"><th class="text-left px-3 py-2 text-gray-500">이름</th><th class="text-left px-3 py-2 text-gray-500">연락처</th><th class="text-left px-3 py-2 text-gray-500">지역</th><th class="text-left px-3 py-2 text-gray-500">채널</th></tr>`
+            document.getElementById('mPreviewBody').innerHTML = parsedLeads.slice(0, 5).map(l => `<tr style="border-bottom:1px solid #111"><td class="px-3 py-2 text-gray-300">${l.name || '-'}</td><td class="px-3 py-2 text-gray-400">${l.contact || '-'}</td><td class="px-3 py-2 text-gray-400">${l.region || '-'}</td><td class="px-3 py-2 text-gray-400">${l.source || '-'}</td></tr>`).join('')
+            document.getElementById('mPreviewSection').classList.remove('hidden')
+            document.getElementById('mUploadResult').classList.add('hidden')
+          }
+
+          function clearUpload() {
+            parsedLeads = []; rawHeaders = []; rawRows = []; currentMapping = {}
+            document.getElementById('dropZone').classList.remove('hidden')
+            document.getElementById('mappingSection').classList.add('hidden')
+            document.getElementById('previewSection').classList.add('hidden')
+            document.getElementById('uploadResult').classList.add('hidden')
+            if (document.getElementById('fileInput')) document.getElementById('fileInput').value = ''
+          }
+
+          // ===== 초기화 =====
+          window.addEventListener('load', () => {
+            if (!checkInviteToken()) {
+              sb.auth.getSession().then(({ data }) => { if (data.session) initApp(data.session.user) })
+            }
+          })
+        </script>
 </body>
+
 </html>
