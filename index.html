@@ -1756,7 +1756,10 @@
           <td class="px-5 py-3" onclick="event.stopPropagation()">
             ${showCheckbox ? `<input type="checkbox" class="lead-chk cursor-pointer" value="${l.id}" onchange="checkSelection()">` : ''}
           </td>
-          <td class="px-5 py-3 text-sm font-medium">${l.name || '-'}</td>
+          <td class="px-5 py-3 text-sm font-medium">
+  <div>${l.name || '-'}</div>
+  ${(() => { const b = allBrands.find(br => br.id === l.brand_id); return b ? `<span style="font-size:10px;color:${b.color};background:${b.color}22;border-radius:4px;padding:1px 6px;">${b.name}</span>` : '' })()}
+</td>
           <td class="px-5 py-3 text-xs text-gray-400">${l.created_at ? new Date(l.created_at).toLocaleDateString('ko-KR') : '-'}</td>
           <td class="px-5 py-3 text-xs text-gray-400">${l.contact || '-'}</td>
           <td class="px-5 py-3 text-xs text-gray-400">${l.region || '-'}</td>
