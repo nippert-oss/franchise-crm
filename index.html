@@ -2029,10 +2029,14 @@
 
           function autoDetectField(header) {
             const clean = header.trim().replace(/\s+/g, '').replace(/[()（）\[\]]/g, '').toLowerCase()
+
+            // 무시할 헤더 (번호, 순번 등)
+            if (['no', 'no.', 'num', '번호', '순번', '순서', '#'].includes(clean)) return 'ignore'
+
             for (const [field, aliases] of Object.entries(colMap)) {
               if (aliases.some(a => {
                 const ac = a.replace(/\s+/g, '').replace(/[()（）\[\]]/g, '').toLowerCase()
-                return clean.includes(ac) || ac.includes(clean)
+                return clean === ac || clean.includes(ac) || ac.includes(clean)
               })) return field
             }
             return 'ignore'
@@ -2256,6 +2260,56 @@
               sb.auth.getSession().then(({ data }) => { if (data.session) initApp(data.session.user) })
             }
           })
+          async function uploadLeads() {
+            if (!parsedLeads.length) return alert('가져올 데이터가 없습니다')
+            const leadsToInsert = parsedLeads.map(l => { const clone = { ...l }; delete clone._tempNote; return clone })
+
+            // 중복 체크 (연락처 기준)
+            const contacts = leadsToInsert.map(l => l.contact).filter(Boolean)
+            let existingContacts = []
+            if (contacts.length) {
+              const { data } = await sb.from('leads').select('contact').in('contact', contacts)
+              existingContacts = (data || []).map(l => l.contact)
+            }
+
+            const newLeads = leadsToInsert.filter(l => !l.contact || !existingContacts.includes(l.contact))
+            const dupCount = leadsToInsert.length - newLeads.length
+
+            if (!newLeads.length) return alert(`모든 데이터가 중복입니다. (${dupCount}건 중복)`)
+            if (dupCount > 0 && !confirm(`중복 ${dupCount}건 제외하고 ${newLeads.length}건만 등록할까요?`)) return
+
+            const { data, error } = await sb.from('leads').insert(newLeads).select()
+            if (error) { alert('오류: ' + error.message); return }
+
+            // 메모 → lead_logs 저장
+            if (data && data.length) {
+              const logsToInsert = []
+              data.forEach((insertedLead, i) => {
+                const original = parsedLeads.find(l => l.name === insertedLead.name && l.contact === insertedLead.contact)
+                if (original?._tempNote) {
+                  const logPayload = { lead_id: insertedLead.id, note: original._tempNote, status_changed_to: insertedLead.status }
+                  if (insertedLead.created_at) logPayload.created_at = insertedLead.created_at
+                  logsToInsert.push(logPayload)
+                }
+              })
+              if (logsToInsert.length) await sb.from('lead_logs').insert(logsToInsert)
+            }
+
+            const msg = dupCount > 0
+              ? `✅ ${newLeads.length}건 등록 완료! (중복 ${dupCount}건 제외)`
+              : `✅ ${newLeads.length}건 등록 완료!`
+
+              ;['uploadResult', 'mUploadResult'].forEach(id => {
+                const el = document.getElementById(id)
+                if (el) { el.textContent = msg; el.classList.remove('hidden') }
+              })
+              ;['previewSection', 'mPreviewSection'].forEach(id => {
+                const el = document.getElementById(id)
+                if (el) el.classList.add('hidden')
+              })
+            parsedLeads = []
+            await loadLeads()
+          }
         </script>
 </body>
 
